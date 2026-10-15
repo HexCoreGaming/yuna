@@ -1,12 +1,12 @@
-# YUNA // RESIDENCE
+# YUNA // RESIDENCE — V0.2
 
 A playable, neo-futuristic 3D home and first-person exploration prototype, built specifically for the private `yuna` GitHub repository. This is a complete static website, not just a screenshot or a placeholder README.
 
 ## What's built
 
 - Interactive 3D home: central atrium, panorama lounge, full kitchen and dining area, bedroom, bathing suite, study/AI lab, and exterior observation deck with reflecting pool.
-- Procedurally built dark-metal architecture, panoramic glass, furniture, artworks, plants, glowing light strips, holographic installation, night-sky stars, distant city skyline, ringed planet, and terraces.
-- First-person WASD movement, mouse look, sprint, collision with internal structural walls, interactive objects via E.
+- Procedurally built dark-metal architecture, panoramic glass, furniture, artworks, plants, glowing light strips, holographic installation, night-sky stars, distant city skyline, ringed planet, and terraces. V0.2 adds bespoke atrium lighting, lounge ceiling sails, detailed kitchen cabinets and stools, bedroom headboard and wardrobe, study cabinetry, spa display shelving and interactive steam-room lighting, and furnished terrace.
+- Corrected camera-relative first-person WASD movement (A = left, D = right), mouse look, sprint, collision with structural walls, E-key interactive objects, input reset when focus is lost, and better menu behavior.
 - Floor-plan fast travel menu, day/night lighting presets, color accents, bloom switch, basic render quality settings, locally saved display preferences.
 - Responsive UI and no user account, data collection, or external analytics.
 

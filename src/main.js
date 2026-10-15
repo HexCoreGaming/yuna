@@ -130,6 +130,93 @@ function cosmicEnvironment(){// starfield and cosmic sky, built procedurally, no
  // floating beams / distant architectural rings
  for(let i=0;i<5;i++){let a=new THREE.Mesh(new THREE.TorusGeometry(68+i*21,1.1,5,90),matGlow(i%2?0x294f9b:0x5b408c));a.position.set(160+i*30,150+i*27,-370-i*38);a.rotation.set(.2,.5,i*.2);scene.add(a)}
 }
+
+// V.02 architectural detailing: individual room identities, warmer task lights,
+// visible architectural joinery, animated water and usable environmental controls.
+function residenceDetails(){
+ const metal=new THREE.MeshStandardMaterial({color:0x353c54,metalness:.86,roughness:.24});
+ const lightStone=new THREE.MeshStandardMaterial({color:0x353949,metalness:.3,roughness:.36});
+ const brushed=new THREE.MeshStandardMaterial({color:0x66718a,metalness:.81,roughness:.28});
+ const linen=new THREE.MeshStandardMaterial({color:0x8f91aa,roughness:.92});
+ // Repeatable built-in wall coffers: steel panels with a restrained illuminated seam.
+ function flutedScreen(x,z,w,turn=0){
+   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=turn;scene.add(g);
+   for(let i=0;i<Math.floor(w/.52);i++){
+     const a=new THREE.Mesh(new THREE.BoxGeometry(.42,3.35,.11),i%2?MAT.wall:MAT.panel);
+     a.position.set(-w/2+.26+i*.52,2.45,0);g.add(a);
+     if(i%4===0){const edge=new THREE.Mesh(new THREE.BoxGeometry(.018,2.9,.125),matGlow(0x354f92));edge.position.set(a.position.x+.23,2.4,0);g.add(edge)}
+   }
+ }
+ // Atrium feature: layered central light ribbons and monolithic gallery walls.
+ for(let z of [4.9,14.5]){
+   for(let x of [-4.9,4.9]){cyl(.19,.24,3.95,MAT.black,x,2.3,z,8);verticalStrip(x+.12,2.2,z,2.9,matGlow(0x4a63a7))}
+ }
+ for(let z of [7.4,12.4]){
+   rect(9.7,.085,.23,MAT.metal,0,4.75,z,{cast:false});
+   rect(9.1,.035,.085,matGlow(0x343e7f),0,4.66,z,{cast:false});
+ }
+ // Lounge's bespoke conversation island, with two floating tables and ceiling sails.
+ for(let z of [4.6,10.3,15.5]){
+   rect(11.6,.13,1.3,MAT.ceil,-13.5,5.05,z);
+   rect(10.5,.028,.08,matGlow(0x384878),-13.5,4.97,z,{cast:false});
+ }
+ for(let x of [-17,-10]){
+   cyl(.6,.67,.39,MAT.black,x,.38,10.2,28);
+   cyl(.53,.53,.035,lightStone,x,.6,10.2,28);
+ }
+ flutedScreen(-6.4,11.8,6.2,Math.PI/2);
+ // Kitchen: backsplash, cabinet door divisions, bar stools and cooktop lighting.
+ rect(8.8,1.7,.10,lightStone,12,2.4,18.13);
+ for(let x=8.3;x<=15.8;x+=1.1){rect(.027,1.6,.12,MAT.metal,x,2.42,18.21);rect(.7,.035,.11,matGlow(0x335c96),x+.38,1.64,18.22)}
+ for(let x of [9.5,11.7,13.9]){
+    cyl(.4,.33,.14,MAT.black,x,.79,9.9,24);
+    cyl(.073,.10,.60,brushed,x,.45,9.9,16);
+    cyl(.26,.28,.05,MAT.metal,x,.16,9.9,20);
+ }
+ for(let x of [10.0,10.65,11.3]){rect(.35,.02,.6,MAT.black,x,1.39,12.2);}
+ // Bedroom: fluted headboard wall, ceiling ribbon, realistic side lighting.
+ flutedScreen(-13,-20.95,13.5,0);
+ for(let x of [-18.6,-7.4]){
+   cyl(.14,.18,.7,MAT.metal,x,1.15,-15.6,12);
+   sphere(.18,matGlow(0x9b83d2),x,1.52,-15.6);
+ }
+ for(let z of [-19.9,-8.5])strip(-13,4.78,z,12,.085,matGlow(0x354586));
+ // Separate low-profile wardrobe in private suite.
+ rect(5.8,3.5,.7,MAT.black,-18.45,2.0,-8.3);
+ for(let x of [-20.0,-18.4,-16.8])rect(.027,2.85,.75,matGlow(0x303e74),x,2,-8.3);
+ // Workroom: hanging screens, generous task lighting and illuminated server plinths.
+ rect(7.8,.11,3.2,MAT.ceil,12,4.95,-1.6);
+ for(let x of [8.5,15.5])strip(x,4.84,-1.6,2.2,.12,matGlow(0x4c75b5));
+ for(let z of [-4,-2.9,-1.8]){
+   rect(2.15,.65,.75,MAT.black,18.9,.63,z);
+   rect(1.9,.12,.79,MAT.metal,18.9,1.0,z);
+   strip(18.9,1.08,z,1.7,.06,matGlow(0x337aab));
+ }
+ // Bathing suite: separate freestanding steam column and warm wall niches.
+ rect(3.3,4.1,.3,MAT.black,7.0,2.27,-13.6);
+ for(let y of [1.12,2.14,3.16]){
+   rect(2.8,.09,.5,brushed,7.0,y,-13.3);
+   rect(2.7,.025,.08,matGlow(0x467eb8),7.0,y+.06,-13.3,{cast:false});
+ }
+ rect(1.4,3.5,1.4,MAT.glassDark,18.9,1.95,-18.5,{cast:false});
+ const spaLamp=light(18.9,3.25,-18.5,0x7b92dc,1.8,5);
+ addInteract('STEAM ROOM',18.8,1.2,-17.6,()=>{spaLamp.visible=!spaLamp.visible;toast('STEAM ROOM LIGHT '+(spaLamp.visible?'ON':'OFF'))},2.7);
+ // Deck: illuminated perimeter, observation seating and restrained planters.
+ for(let x=-19;x<=19;x+=4.75){
+   cyl(.23,.3,.38,MAT.black,x,.42,-35.0,10);
+   cyl(.22,.22,.04,matGlow(0x4878b8),x,.65,-35.0,10);
+ }
+ for(let x of [-10.5,10.5]){
+    rect(3.3,.14,1.1,MAT.black,x,.35,-25.4);
+    rect(3.2,.2,.92,linen,x,.51,-25.4);
+    rect(3.3,.69,.16,MAT.panel,x,.92,-25.9);
+ }
+ // Several architectural labels, not dozens of billboard decorations.
+ sign('THE NIGHT IS YOURS',-13.5,3.8,1.4,.16);
+ sign('PRIVATE SANCTUARY',-13,3.95,-20.3,.18);
+ sign('SKYLINE OBSERVATORY',0,3.6,-22.6,.19);
+}
+
 // browser runtime features
 const keys=new Set();let yaw=0,pitch=0,step=0,clock=0,moveSpeed=5;const vec=new THREE.Vector3();
 function constrain(pos,axis,previous){pos.x=Math.max(-20.95,Math.min(20.95,pos.x));pos.z=Math.max(-35.8,Math.min(21.1,pos.z));const radius=.34;for(const r of collision){if(Math.abs(pos.x-r.x)<r.w/2+radius&&Math.abs(pos.z-r.z)<r.d/2+radius){pos[axis]=previous;break}}}
@@ -144,8 +231,8 @@ function openPanel(kind){if(!app.entered)return;if(app.opened===kind){closePanel
 function applyColor(v){app.accent=v;document.documentElement.style.setProperty('--accent','#'+AC[v].toString(16).padStart(6,'0'));document.querySelectorAll('[data-color]').forEach(x=>x.classList.toggle('selected',x.dataset.color===v));save()}
 function applyMode(v){app.mode=v;const vals={night:{bg:'#090817',fog:0x15132e,exp:1.3,direct:2.5,hemi:2.25},dusk:{bg:'#241a3f',fog:0x35245b,exp:1.65,direct:3,hemi:2.6},day:{bg:'#263550',fog:0x364766,exp:1.85,direct:3.9,hemi:3.1}};const o=vals[v];scene.background.set(o.bg);scene.fog.color.setHex(o.fog);renderer.toneMappingExposure=o.exp;direct.intensity=o.direct;hemi.intensity=o.hemi;el('mode-label').textContent=v==='night'?'NIGHT CYCLE':v==='dusk'?'VIOLET DUSK':'BLUE HOUR';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===v));save()}
 function applyQuality(v){app.quality=+v;renderer.setPixelRatio(Math.min(devicePixelRatio,app.quality+.35));composer.setSize(innerWidth,innerHeight);save()}
-function events(){el('enter').onclick=()=>{app.entered=true;el('intro').classList.add('hidden');lock();toast('WELCOME HOME')};el('scene').addEventListener('click',lock);document.addEventListener('pointerlockchange',()=>{app.locked=document.pointerLockElement===el('scene');document.body.classList.toggle('paused',!app.locked&&app.entered&&!app.opened)});document.addEventListener('mousemove',e=>{if(!app.locked)return;yaw-=e.movementX*.00215;pitch-=e.movementY*.00215;pitch=Math.max(-1.48,Math.min(1.48,pitch))});document.addEventListener('keydown',e=>{if(e.repeat)return;keys.add(e.code);if(e.code==='KeyM'){openPanel('map');e.preventDefault()}if(e.code==='KeyE'&&app.locked&&app.interact)app.interact.fn();if(e.code==='Escape'){if(app.opened)closePanels()}});document.addEventListener('keyup',e=>keys.delete(e.code));el('btn-map').onclick=()=>openPanel('map');el('btn-settings').onclick=()=>openPanel('settings');el('btn-help').onclick=()=>openPanel('help');document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>{closePanels();lock()});for(let r of rooms){const b=document.createElement('button');b.className='room-row';b.innerHTML='<span>'+r.name+'</span><small>→</small>';b.title=r.desc;b.onclick=()=>teleport(r);el('map-rooms').append(b)}document.querySelectorAll('[data-mode]').forEach(x=>x.onclick=()=>applyMode(x.dataset.mode));document.querySelectorAll('[data-color]').forEach(x=>x.onclick=()=>applyColor(x.dataset.color));el('quality').value=app.quality;el('quality').onchange=e=>applyQuality(e.target.value);el('bloom').checked=app.bloom;el('bloom').onchange=e=>{app.bloom=e.target.checked;save()};el('motion').checked=app.motion;el('motion').onchange=e=>{app.motion=e.target.checked;save()};el('reset').onclick=()=>{app.bloom=true;app.motion=true;el('bloom').checked=true;el('motion').checked=true;applyMode('night');applyColor('violet');applyQuality(1);el('quality').value='1';toast('DEFAULTS RESTORED')};addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)})}
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.06,timeClock.getDelta());clock+=dt;const t=clock;for(let d of dynamic){if(d.update)d.update(t);if(d.mesh){d.angle=THREE.MathUtils.damp(d.angle,d.target,5,dt);d.mesh.rotation.y=d.angle}}if(app.locked){camera.rotation.set(pitch,yaw,0);let f=0,s=0;if(keys.has('KeyW')||keys.has('ArrowUp'))f++;if(keys.has('KeyS')||keys.has('ArrowDown'))f--;if(keys.has('KeyA')||keys.has('ArrowLeft'))s--;if(keys.has('KeyD')||keys.has('ArrowRight'))s++;const speed=keys.has('ShiftLeft')?8.5:5.1;const n=Math.hypot(f,s)||1;f/=n;s/=n;const prevX=camera.position.x,prevZ=camera.position.z;camera.position.x+=(Math.sin(yaw)*f-Math.cos(yaw)*s)*speed*dt;constrain(camera.position,'x',prevX);camera.position.z+=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*speed*dt;constrain(camera.position,'z',prevZ);step+=(Math.abs(f)+Math.abs(s))*dt*10;camera.position.y=1.73+(app.motion?(Math.sin(step)*.024)*(Math.abs(f)+Math.abs(s)>0?1:.12):0);updateNearby();setLocation()}else if(!app.entered){camera.rotation.y=-.06+Math.sin(t*.12)*.08;camera.rotation.x=-.015;camera.position.set(Math.sin(t*.14)*.28,1.73,10.7)}if(app.bloom)composer.render();else renderer.render(scene,camera)}
+function events(){el('enter').onclick=()=>{app.entered=true;el('intro').classList.add('hidden');lock();toast('WELCOME HOME')};el('scene').addEventListener('click',lock);document.addEventListener('pointerlockchange',()=>{app.locked=document.pointerLockElement===el('scene');if(!app.locked)keys.clear();document.body.classList.toggle('paused',!app.locked&&app.entered&&!app.opened)});document.addEventListener('mousemove',e=>{if(!app.locked)return;yaw-=e.movementX*.00215;pitch-=e.movementY*.00215;pitch=Math.max(-1.48,Math.min(1.48,pitch))});document.addEventListener('keydown',e=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.repeat)return;keys.add(e.code);if(e.code==='KeyM'){openPanel('map');e.preventDefault()}if(e.code==='KeyE'&&app.locked&&app.interact)app.interact.fn();if(e.code==='Escape'){if(app.opened){closePanels();lock()}}});document.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>keys.clear());document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});el('btn-map').onclick=()=>openPanel('map');el('btn-settings').onclick=()=>openPanel('settings');el('btn-help').onclick=()=>openPanel('help');document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>{closePanels();lock()});for(let r of rooms){const b=document.createElement('button');b.className='room-row';b.innerHTML='<span>'+r.name+'</span><small>→</small>';b.title=r.desc;b.onclick=()=>teleport(r);el('map-rooms').append(b)}document.querySelectorAll('[data-mode]').forEach(x=>x.onclick=()=>applyMode(x.dataset.mode));document.querySelectorAll('[data-color]').forEach(x=>x.onclick=()=>applyColor(x.dataset.color));el('quality').value=app.quality;el('quality').onchange=e=>applyQuality(e.target.value);el('bloom').checked=app.bloom;el('bloom').onchange=e=>{app.bloom=e.target.checked;save()};el('motion').checked=app.motion;el('motion').onchange=e=>{app.motion=e.target.checked;save()};el('reset').onclick=()=>{app.bloom=true;app.motion=true;el('bloom').checked=true;el('motion').checked=true;applyMode('night');applyColor('violet');applyQuality(1);el('quality').value='1';toast('DEFAULTS RESTORED')};addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)})}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(.06,timeClock.getDelta());clock+=dt;const t=clock;for(let d of dynamic){if(d.update)d.update(t);if(d.mesh){d.angle=THREE.MathUtils.damp(d.angle,d.target,5,dt);d.mesh.rotation.y=d.angle}}if(app.locked){camera.rotation.set(pitch,yaw,0);let f=0,s=0;if(keys.has('KeyW')||keys.has('ArrowUp'))f++;if(keys.has('KeyS')||keys.has('ArrowDown'))f--;if(keys.has('KeyA')||keys.has('ArrowLeft'))s--;if(keys.has('KeyD')||keys.has('ArrowRight'))s++;const speed=(keys.has('ShiftLeft')||keys.has('ShiftRight'))?8.5:5.1;const n=Math.hypot(f,s)||1;f/=n;s/=n;const prevX=camera.position.x,prevZ=camera.position.z;camera.position.x+=(Math.sin(yaw)*f+Math.cos(yaw)*s)*speed*dt;constrain(camera.position,'x',prevX);camera.position.z+=(-Math.cos(yaw)*f+Math.sin(yaw)*s)*speed*dt;constrain(camera.position,'z',prevZ);step+=(Math.abs(f)+Math.abs(s))*dt*10;camera.position.y=1.73+(app.motion?(Math.sin(step)*.024)*(Math.abs(f)+Math.abs(s)>0?1:.12):0);updateNearby();setLocation()}else if(!app.entered){camera.rotation.y=-.06+Math.sin(t*.12)*.08;camera.rotation.x=-.015;camera.position.set(Math.sin(t*.14)*.28,1.73,10.7)}if(app.bloom)composer.render();else renderer.render(scene,camera)}
 const timeClock=new THREE.Clock();
-async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
+async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
 init();
