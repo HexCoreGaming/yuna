@@ -23,3 +23,9 @@
 
 .yuna-actions .option.active{color:#f2eeff;border-color:#a78dff;background:#6347a877}
 .mode-explainer{border:1px solid #6c5f9b55;padding:10px 12px;margin-top:9px;font:500 11px/1.5 Rajdhani;letter-spacing:.35px;color:#bdb2da}
+
+/* Pocket mode entry only; preserves the existing 3D systems. */
+.pocket-entry{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:13px;padding:14px 19px;border:1px solid rgba(169,146,253,.68);background:linear-gradient(110deg,rgba(43,27,83,.67),rgba(12,17,35,.67));color:#eee5ff;font-size:11px;font-weight:700;letter-spacing:.12em;text-decoration:none;transition:background .2s,border .2s}
+.pocket-entry:hover{background:rgba(75,48,131,.75);border-color:#c0adff}.pocket-entry span{font-size:9px;letter-spacing:.08em;color:#bcaaf7}
+.pocket-menu-link{min-width:37px;height:37px;display:grid;place-items:center;border:1px solid rgba(139,117,205,.52);background:rgba(12,14,40,.86);color:#d0baff;font-size:11px;font-weight:800;letter-spacing:.03em;text-decoration:none}
+.pocket-menu-link:hover{border-color:#c9a9ff;background:#302350}
