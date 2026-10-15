@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createYuna } from './yuna.js';
+import { movementDelta } from './movement.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -14,7 +15,7 @@ const AC={violet:0x9b70ff,cyan:0x58def7,rose:0xff69b4};
 const renderer=new THREE.WebGLRenderer({canvas:el('scene'),antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,Number(app.quality)+.35));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.30;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene();scene.background=new THREE.Color('#090817');scene.fog=new THREE.FogExp2(0x15132e,.0068);
-const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.07,3200);camera.rotation.order='YXZ';camera.position.set(0,1.73,10);
+const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.07,3200);camera.rotation.order='YXZ';camera.position.set(0,1.73,16);
 const hemi=new THREE.HemisphereLight(0x9db7ff,0x141221,2.25);scene.add(hemi);
 const direct=new THREE.DirectionalLight(0xb4afff,2.5);direct.position.set(-13,35,-25);direct.castShadow=true;direct.shadow.mapSize.set(2048,2048);direct.shadow.camera.left=-65;direct.shadow.camera.right=65;direct.shadow.camera.top=65;direct.shadow.camera.bottom=-65;direct.shadow.bias=-.0005;scene.add(direct);
 const ambience=new THREE.AmbientLight(0x717cad,.35);scene.add(ambience);
@@ -24,7 +25,7 @@ const MAT={stone:new THREE.MeshStandardMaterial({color:0x131620,roughness:.25,me
 let glowMat;
 let yuna=null;
 const collision=[];const interactive=[];const dynamic=[];const rooms=[
- {name:'CENTRAL ATRIUM',x:0,z:10,desc:'Main arrival gallery'},
+ {name:'CENTRAL ATRIUM',x:0,z:16,desc:'Main arrival gallery'},
  {name:'PANORAMA LOUNGE',x:-12,z:5,desc:'Relax and enjoy the cosmos'},
  {name:'CHEF’S KITCHEN',x:11,z:6,desc:'Kitchen and dining'},
  {name:'PRIVATE BEDROOM',x:-12,z:-13,desc:'Rest and unwind'},
@@ -220,16 +221,16 @@ function residenceDetails(){
 }
 
 // browser runtime features
-const keys=new Set();let yaw=0,pitch=0,step=0,clock=0,moveSpeed=5;const vec=new THREE.Vector3();
+const keys=new Set();let yaw=0,pitch=0,step=0,clock=0;
 function constrain(pos,axis,previous){pos.x=Math.max(-20.95,Math.min(20.95,pos.x));pos.z=Math.max(-35.8,Math.min(21.1,pos.z));const radius=.34;for(const r of collision){if(Math.abs(pos.x-r.x)<r.w/2+radius&&Math.abs(pos.z-r.z)<r.d/2+radius){pos[axis]=previous;break}}}
 function toast(t){el('toast').textContent=t;el('toast').style.opacity=1;clearTimeout(toast.timer);toast.timer=setTimeout(()=>el('toast').style.opacity=0,2200)}
 function updateNearby(){let best=null,d=Infinity;for(let it of interactive){const dx=it.pos.x-camera.position.x,dz=it.pos.z-camera.position.z;const di=Math.hypot(dx,dz);if(di<it.r&&di<d){let view=new THREE.Vector3(0,0,-1).applyEuler(camera.rotation);let dot=(dx*view.x+dz*view.z)/(di||1);if(dot>-.35){best=it;d=di}}}app.interact=best;el('interaction').style.display=best&&app.locked?'flex':'none';if(best)el('interaction-name').textContent=best.name}
 function setLocation(){let best=rooms[0],d=Infinity;for(let room of rooms){let ds=Math.hypot(camera.position.x-room.x,camera.position.z-room.z);if(ds<d){best=room;d=ds}}el('location').textContent=best.name}
-function teleport(r){camera.position.set(r.x,1.73,r.z);yaw=0;pitch=0;camera.rotation.set(0,0,0);closePanels();toast('ARRIVED / '+r.name);setLocation();if(app.entered)lock()}
+function teleport(r){keys.clear();camera.position.set(r.x,1.73,r.z);yaw=0;pitch=0;camera.rotation.set(0,0,0);closePanels();toast('ARRIVED / '+r.name);setLocation();if(app.entered)lock()}
 function lock(){if(document.pointerLockElement!==el('scene')&&app.entered&&!(Object.values(panels).some(p=>!p.classList.contains('hidden'))))el('scene').requestPointerLock?.()}
 const panels={map:el('panel-map'),settings:el('panel-settings'),help:el('panel-help'),yuna:el('panel-yuna')};
 function closePanels(){for(let p of Object.values(panels))p.classList.add('hidden');app.opened=null}
-function openPanel(kind){if(!app.entered)return;if(app.opened===kind){closePanels();lock();return}closePanels();panels[kind].classList.remove('hidden');app.opened=kind;document.exitPointerLock?.()}
+function openPanel(kind){if(!app.entered)return;keys.clear();if(app.opened===kind){closePanels();lock();return}closePanels();panels[kind].classList.remove('hidden');app.opened=kind;document.exitPointerLock?.()}
 function applyColor(v){app.accent=v;document.documentElement.style.setProperty('--accent','#'+AC[v].toString(16).padStart(6,'0'));document.querySelectorAll('[data-color]').forEach(x=>x.classList.toggle('selected',x.dataset.color===v));save()}
 function applyMode(v){app.mode=v;const vals={night:{bg:'#090817',fog:0x15132e,exp:1.3,direct:2.5,hemi:2.25},dusk:{bg:'#241a3f',fog:0x35245b,exp:1.65,direct:3,hemi:2.6},day:{bg:'#263550',fog:0x364766,exp:1.85,direct:3.9,hemi:3.1}};const o=vals[v];scene.background.set(o.bg);scene.fog.color.setHex(o.fog);renderer.toneMappingExposure=o.exp;direct.intensity=o.direct;hemi.intensity=o.hemi;el('mode-label').textContent=v==='night'?'NIGHT CYCLE':v==='dusk'?'VIOLET DUSK':'BLUE HOUR';document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===v));save()}
 function applyQuality(v){app.quality=+v;renderer.setPixelRatio(Math.min(devicePixelRatio,app.quality+.35));composer.setSize(innerWidth,innerHeight);save()}
@@ -251,7 +252,7 @@ function events(){
   el('btn-sculpt').onclick=()=>characterMode('model');
   el('btn-yuna-wave').onclick=()=>{if(yuna?.getDisplayMode()==='reference')characterMode('model');yuna?.wave();closePanels();lock();toast('YUNA / HELLO')};
   el('btn-yuna-find').onclick=()=>{
-    camera.position.set(-3.2,1.73,16.5);yaw=0;pitch=-.04;
+    keys.clear();camera.position.set(-3.2,1.73,16.5);yaw=0;pitch=-.04;
     closePanels();lock();toast('YUNA / ATRIUM');setLocation();
   };
   el('hair-strength').oninput=e=>yuna?.setHairFlow(e.target.value);
@@ -259,8 +260,39 @@ function events(){
   el('btn-character-reference').onclick=()=>el('character-reference-overlay').classList.remove('hidden');
   el('close-character-reference').onclick=()=>el('character-reference-overlay').classList.add('hidden');
   el('character-reference-overlay').addEventListener('click',e=>{if(e.target.id==='character-reference-overlay')e.currentTarget.classList.add('hidden')});
-  el('enter').onclick=()=>{app.entered=true;el('intro').classList.add('hidden');lock();toast('WELCOME HOME')};el('scene').addEventListener('click',lock);document.addEventListener('pointerlockchange',()=>{app.locked=document.pointerLockElement===el('scene');if(!app.locked)keys.clear();document.body.classList.toggle('paused',!app.locked&&app.entered&&!app.opened)});document.addEventListener('mousemove',e=>{if(!app.locked)return;yaw-=e.movementX*.00215;pitch-=e.movementY*.00215;pitch=Math.max(-1.48,Math.min(1.48,pitch))});document.addEventListener('keydown',e=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.repeat)return;keys.add(e.code);if(e.code==='KeyM'){openPanel('map');e.preventDefault()}if(e.code==='KeyY'){openPanel('yuna');e.preventDefault()}if(e.code==='KeyE'&&app.locked&&app.interact)app.interact.fn();if(e.code==='Escape'){if(!el('character-reference-overlay').classList.contains('hidden'))el('character-reference-overlay').classList.add('hidden');else if(app.opened){closePanels();lock()}}});document.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>keys.clear());document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});el('btn-map').onclick=()=>openPanel('map');el('btn-settings').onclick=()=>openPanel('settings');el('btn-help').onclick=()=>openPanel('help');document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>{closePanels();lock()});for(let r of rooms){const b=document.createElement('button');b.className='room-row';b.innerHTML='<span>'+r.name+'</span><small>→</small>';b.title=r.desc;b.onclick=()=>teleport(r);el('map-rooms').append(b)}document.querySelectorAll('[data-mode]').forEach(x=>x.onclick=()=>applyMode(x.dataset.mode));document.querySelectorAll('[data-color]').forEach(x=>x.onclick=()=>applyColor(x.dataset.color));el('quality').value=app.quality;el('quality').onchange=e=>applyQuality(e.target.value);el('bloom').checked=app.bloom;el('bloom').onchange=e=>{app.bloom=e.target.checked;save()};el('motion').checked=app.motion;el('motion').onchange=e=>{app.motion=e.target.checked;save()};el('reset').onclick=()=>{app.bloom=true;app.motion=true;el('bloom').checked=true;el('motion').checked=true;applyMode('night');applyColor('violet');applyQuality(1);el('quality').value='1';toast('DEFAULTS RESTORED')};addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)})}
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.06,timeClock.getDelta());clock+=dt;const t=clock;if(yuna)yuna.update(t,dt,camera.position);for(let d of dynamic){if(d.update)d.update(t);if(d.mesh){d.angle=THREE.MathUtils.damp(d.angle,d.target,5,dt);d.mesh.rotation.y=d.angle}}if(app.locked){camera.rotation.set(pitch,yaw,0);let f=0,s=0;if(keys.has('KeyW')||keys.has('ArrowUp'))f++;if(keys.has('KeyS')||keys.has('ArrowDown'))f--;if(keys.has('KeyA')||keys.has('ArrowLeft'))s--;if(keys.has('KeyD')||keys.has('ArrowRight'))s++;const speed=(keys.has('ShiftLeft')||keys.has('ShiftRight'))?8.5:5.1;const n=Math.hypot(f,s)||1;f/=n;s/=n;const prevX=camera.position.x,prevZ=camera.position.z;camera.position.x+=(Math.sin(yaw)*f+Math.cos(yaw)*s)*speed*dt;constrain(camera.position,'x',prevX);camera.position.z+=(-Math.cos(yaw)*f+Math.sin(yaw)*s)*speed*dt;constrain(camera.position,'z',prevZ);step+=(Math.abs(f)+Math.abs(s))*dt*10;camera.position.y=1.73+(app.motion?(Math.sin(step)*.024)*(Math.abs(f)+Math.abs(s)>0?1:.12):0);updateNearby();setLocation()}else if(!app.entered){camera.rotation.y=-.06+Math.sin(t*.12)*.08;camera.rotation.x=-.015;camera.position.set(Math.sin(t*.14)*.28,1.73,10.7)}if(app.bloom)composer.render();else renderer.render(scene,camera)}
+  el('enter').onclick=()=>{app.entered=true;el('intro').classList.add('hidden');lock();toast('WELCOME HOME')};el('scene').addEventListener('click',lock);document.addEventListener('pointerlockchange',()=>{app.locked=document.pointerLockElement===el('scene');if(!app.locked)keys.clear();document.body.classList.toggle('paused',!app.locked&&app.entered&&!app.opened)});document.addEventListener('mousemove',e=>{if(!app.locked)return;yaw-=e.movementX*.00215;pitch-=e.movementY*.00215;pitch=Math.max(-1.48,Math.min(1.48,pitch))});document.addEventListener('keydown',e=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.repeat)return;if(app.locked)keys.add(e.code);if(e.code==='KeyM'){openPanel('map');e.preventDefault()}if(e.code==='KeyY'){openPanel('yuna');e.preventDefault()}if(e.code==='KeyE'&&app.locked&&app.interact)app.interact.fn();if(e.code==='Escape'){if(!el('character-reference-overlay').classList.contains('hidden'))el('character-reference-overlay').classList.add('hidden');else if(app.opened){closePanels();lock()}}});document.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>keys.clear());document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});el('btn-map').onclick=()=>openPanel('map');el('btn-settings').onclick=()=>openPanel('settings');el('btn-help').onclick=()=>openPanel('help');document.querySelectorAll('[data-close]').forEach(x=>x.onclick=()=>{closePanels();lock()});for(let r of rooms){const b=document.createElement('button');b.className='room-row';b.innerHTML='<span>'+r.name+'</span><small>→</small>';b.title=r.desc;b.onclick=()=>teleport(r);el('map-rooms').append(b)}document.querySelectorAll('[data-mode]').forEach(x=>x.onclick=()=>applyMode(x.dataset.mode));document.querySelectorAll('[data-color]').forEach(x=>x.onclick=()=>applyColor(x.dataset.color));el('quality').value=app.quality;el('quality').onchange=e=>applyQuality(e.target.value);el('bloom').checked=app.bloom;el('bloom').onchange=e=>{app.bloom=e.target.checked;save()};el('motion').checked=app.motion;el('motion').onchange=e=>{app.motion=e.target.checked;save()};el('reset').onclick=()=>{app.bloom=true;app.motion=true;el('bloom').checked=true;el('motion').checked=true;applyMode('night');applyColor('violet');applyQuality(1);el('quality').value='1';toast('DEFAULTS RESTORED')};addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight)})}
+function animate(){
+  requestAnimationFrame(animate);
+  const dt=Math.min(.06,timeClock.getDelta());
+  clock+=dt;
+  const t=clock;
+  if(yuna)yuna.update(t,dt,camera.position);
+  for(const d of dynamic){
+    if(d.update)d.update(t);
+    if(d.mesh){d.angle=THREE.MathUtils.damp(d.angle,d.target,5,dt);d.mesh.rotation.y=d.angle}
+  }
+  if(app.locked){
+    // Mouse rotation and WASD both use the same yaw. No inverted forward/strafe axes.
+    camera.rotation.set(pitch,yaw,0);
+    const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight');
+    const move=movementDelta(yaw,keys,sprint?8.5:5.1,dt);
+    const prevX=camera.position.x;
+    camera.position.x+=move.x;
+    constrain(camera.position,'x',prevX);
+    const prevZ=camera.position.z;
+    camera.position.z+=move.z;
+    constrain(camera.position,'z',prevZ);
+    if(move.moving)step+=dt*(sprint?15:10);
+    camera.position.y=1.73+(app.motion&&move.moving?Math.sin(step)*.024:0);
+    updateNearby();
+    setLocation();
+  }else if(!app.entered){
+    camera.rotation.y=-.06+Math.sin(t*.12)*.08;
+    camera.rotation.x=-.015;
+    camera.position.set(Math.sin(t*.14)*.28,1.73,10.7);
+  }
+  if(app.bloom)composer.render();else renderer.render(scene,camera);
+}
 const timeClock=new THREE.Clock();
 async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='MATERIALIZING YUNA';bar.style.width='67%';yuna=createYuna(THREE,scene);addInteract('MEET YUNA',-3.15,1.5,12.9,()=>{openPanel('yuna');yuna.setPose('greet')},2.75);status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
 init();

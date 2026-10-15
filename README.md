@@ -1,6 +1,21 @@
-# YUNA // RESIDENCE — CHARACTER INTEGRATION V0.3
+# YUNA // RESIDENCE — CAMERA-RELATIVE CONTROLS V0.4
 
-**Complete replacement project for your private `yuna` GitHub repository.** Contains the entire existing explorable residence, its V0.2 controls and room-detail updates, and the new Yuna character system. Copy **all** contents of this ZIP into your repo's root.
+**Complete replacement project for your private `yuna` GitHub repository.** Contains the entire existing explorable residence, the complete V0.3 character integration and room-detail updates, and the new Yuna character system. Copy **all** contents of this ZIP into your repo's root.
+
+## V0.4 fix — standard first-person mouse + WASD
+
+The V0.3 movement formula used incorrect signs for the camera yaw. This release replaces it with tested camera-relative vectors using the same yaw as mouse look:
+
+- **W** moves horizontally toward the direction the camera faces; **S** moves backward.
+- **A/D** strafe left and right relative to the camera, including after turning 90°, 180° or diagonally.
+- Pitch does not affect walking height. Moving diagonally is normalized to the same speed as a single direction, and **Shift** runs faster.
+- Pressing opposite direction keys cancels that axis. Releasing mouse lock, opening menus, switching tabs, or losing focus clears held-key state to avoid stuck motion.
+- Starting position and the atrium floor-plan teleport have moved to an open aisle (`x=0, z=16`) so testing strafing doesn't immediately collide with an adjacent wall.
+- All V0.3 home and Yuna systems remain included. Nothing else was redesigned.
+
+To verify the controller logic yourself: **`npm test`** (Node.js installed) runs eight movement tests without installing dependencies. The test module is `src/movement.js`, used by the game itself.
+
+**Browser check limitation:** automated Node controller tests and JavaScript syntax checks ran; full browser render was not verified in this environment because the browser harness blocked localhost access. Run the site on your PC to verify performance and graphics. The Three.js dependency is still loaded via the existing CDN, so rendering requires connectivity.
 
 ## What's new in V0.3
 
@@ -18,7 +33,7 @@ The **ANOTHER LINE** control displays prewritten text. **This is scripted previe
 ## Everything preserved from V0.2
 
 - The existing central atrium, lounge, kitchen/dining room, bedroom, study, bathing suite, and observation terrace, including furniture, decorative geometry, cosmic sky and planet.
-- The existing W/A/S/D movement fix (W forward, S backward, A left, D right relative to camera), mouse look, sprint, structural-wall collision, interaction key, and pause/focus behavior.
+- The corrected and tested V0.4 camera-relative W/A/S/D movement (W forward, S backward, A left, D right), mouse look, sprint, structural-wall collision, interaction key, and pause/focus behavior.
 - The architectural room details, lighting controls, ambient presets, bloom, color accents, render-quality menu, fast travel, furniture interactions and room directory.
 - No account required, no tracking code or analytics, browser-local display preferences.
 
@@ -61,6 +76,9 @@ index.html                       Main HTML, HUD, panels, Three import map
 style.css                        2026-style dark interface / UI
 src/main.js                      Original home, movement, interaction + Yuna wiring
 src/yuna.js                      3D Yuna prototype, hair animation and artwork projection
+src/movement.js                  First-person camera-relative movement math
+tests/movement.test.mjs         Automated WASD movement tests
+package.json                    npm test command (no dependencies)
 assets/yuna-approved-reference.webp   Original approved reference in compressed format
 assets/yuna-view-0.webp          Front artwork projection with transparent background
 assets/yuna-view-1.webp          Left-side artwork projection with transparent background
