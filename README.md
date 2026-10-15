@@ -1,43 +1,31 @@
-# YUNA Residence — V0.7 • 360° Animated Character Integration
+# YUNA Residence — V0.8 • Character Refinement
 
-A complete replacement for the previous YUNA repository files. Do not copy only `src/yuna.js`: extract **everything** into the repository, including `assets/` and tests.
+**Complete replacement ZIP** for the existing Yuna GitHub Pages repository. Copy every file and folder over the existing project. Preserve the existing folder layout, including `src/`, `assets/`, and `tests/`.
 
-## What is implemented
+## What changed from V0.7
 
-- **The previous home remains intact**: atrium, panorama lounge, kitchen/dining, bedroom, study, bathing suite, observation terrace, portals, environmental settings and lighting.
-- **The existing V0.5/V0.6 FPS camera controller is untouched**: mouse looking, WASD aligned with camera, Shift sprint, proximity E, escape/panels, collision and floorplan.
-- **New three-dimensional Yuna**: new lofted female silhouette with separate front, left, right and back curved surface patches, using textures derived from the user-approved turnaround reference. The front, profile and back images are not flat billboards in the world. The original reference image is preserved.
-- **Articulated model**: hip/knee/ankle and shoulder/elbow pivot hierarchy, procedural walking cycle, body sway, breathing, head/neck movement, optional wave animation.
-- **Floating hair**: dozens of tapered 3D ribbons with moving vertices and spring-like underwater drift, configurable speed/intensity.
-- **Secondary motion**: damped spring-driven anterior torso and posterior contour movement, independently animated while walking; no widening of the hip profile. Intensity slider (0–2.5).
-- **Autonomous wandering**: Yuna strolls through a short, safe route inside the central atrium; pause or resume using the Y menu. She will not turn to face the player just because the player moves.
-- **Free inspection**: press Y and choose VIEW CHARACTER UP CLOSE. This pauses movement and positions your camera near Yuna; you can use normal controls to orbit her from any side.
-- **Scripted greeting only**: the conversation preview remains scripted, NOT real AI.
+The update addresses the specific problems visible in the submitted screenshots, concentrating on Yuna without redesigning the existing residence:
 
-## How to run
+- **Continuous tapered arms:** reconstructed upper arms, elbows, forearms, wrists and small fingers, using smoothly varying full-volume geometry instead of prominent separate shoulder spheres, blocky arm pieces and bead-like hands.
+- **Smoother outline:** narrower, more continuous waist/hip transition and rear volume projected backwards rather than widening the hip contour; adjusted head proportions.
+- **Hair closer to the artwork:** reworked the oversized hair tubes into a loose bun with 50+ short, tapered, flowing sheet-strands. These animate independently with subtle underwater drift.
+- **Softer holographic finish:** substantially reduced excessive metallic shine and overbright local lighting so the approved reference textures and facial detail are more legible.
+- **Better standing position:** moved her small atrium roaming route away from the center sculpture so floating rings obscure her less often.
+- **Feet:** removed separate bead-like toes and replaced them with smoother foot and instep volumes.
+- **Full 360-degree inspection:** camera-following remains disabled. Character rotation, autonomous wandering, walking, waving, hair-flow and secondary-motion sliders remain available in the Y menu.
 
-Open a terminal or Windows command prompt in this folder and launch a local static server:
+**Unchanged:** the working `src/fps-controls.js` file (camera-relative WASD, mouse-look, sprint), the seven residence areas, room interactions, portals, settings, and other navigation.
 
-`python -m http.server 8000`
+## Running it
 
-Visit `http://localhost:8000`. On Windows you can also use `run-local.bat` if Python is installed. The site can be hosted by GitHub Pages; it is entirely client-side and **loads Three.js from a CDN**. An internet connection is required for the initial Three.js library load. It does not run a private language model or store cloud conversation history.
+Use the existing GitHub Pages URL after committing and pushing the replacement. To run locally with a static server, in the project folder run `python -m http.server 8000` and visit `http://localhost:8000`. Alternatively use `run-local.bat` on Windows when Python is installed. This app loads Three.js from a CDN, so an internet connection is needed to load that dependency.
 
-## Controls
+**Controls:** W/A/S/D + mouse (first person), Shift (sprint), E (interact), M (map), Y (Yuna), Esc (unlock mouse/close panels). In Yuna's panel you can pause wandering, move close to her, manually rotate her, adjust floating hair and secondary-motion intensity, and play scripted interactions.
 
-- `W/A/S/D`: movement relative to where you look; `mouse`: look; `Shift`: sprint.
-- `E`: interact when close; `M`: floorplan; `Y`: character settings; `Esc`: cursor/overlay.
-- `Y` menu: pause/resume wandering, close-up view, rotate 45 degrees, reset facing, adjust secondary physics and hair flow, wave, show reference sheet.
+## Quality and testing
 
-## Quality and limitations — important
+This is an improved **procedural 3D character prototype using textures from your approved 4-view artwork**, not a professional digital human. It does not yet have an artist-built retopologized body, an accurate facial rig, production hair simulation, or motion-captured animation. It will look better than the large disconnected shapes of V0.7, but cannot be guaranteed to reproduce the 2D artwork exactly at every angle.
 
-**This is a true volumetric, textured, animated 3D model, not the exact production-quality replica the four-view concept art deserves.** Its surface detail is projected from the user's approved artwork onto a new mesh, and its joints are procedural. That is more faithful to the original colors and appearance than the previous primitive geometry, but image projection produces inevitable distortions when viewing extreme angles. Its face and hair still lack the artist-sculpted geometry, professional rigging, and texture maps required for genuinely photorealistic motion. **Do not mistake this for a scan, motion capture, AI model, Blender sculpt, or commercially finished digital human.**
+15 automated code/geometry and first-person movement regression tests passed, and JavaScript syntax and ZIP integrity were checked. **A complete rendered in-browser visual test was unavailable in the packaging environment.** Use the site on your PC to inspect the actual result.
 
-Performance depends on your GPU, and a few older room props are still procedurally generated. This build has automated tests and JavaScript syntax verification; a full rendered browser test with Three.js was not available in the packaging environment.
-
-## Development and tests
-
-From the project folder, run `npm test` (requires Node.js but no npm packages). All tests use local, small geometry stand-ins; they are not a substitute for a real GPU render test. No other dependencies are bundled; Three.js remains CDN-based as in the previous working residence.
-
-## Privacy
-
-This repo includes no working external AI API, private conversation logs or credentials. Keep future adult-only character content, personal memories, credentials and local-model files outside a public GitHub repository. Prefer a private repository for your personal application.
+This repository is a static interactive visual prototype, not a live AI chat application. The dialogue preview is scripted and it stores no private chat logs.

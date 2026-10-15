@@ -254,12 +254,12 @@ function events(){
   el('btn-yuna-reset-facing').onclick=()=>{yuna?.resetFacing();yuna?.setWander(false);el('btn-yuna-wander').textContent='START WANDERING'};
   el('btn-yuna-wander').onclick=()=>{const next=!yuna?.getWander();yuna?.setWander(next);el('btn-yuna-wander').textContent=next?'PAUSE WANDERING':'START WANDERING'};
   el('btn-yuna-stage').onclick=()=>{yuna?.setWander(false);el('btn-yuna-wander').textContent='START WANDERING';
-    const p=yuna?.root.position||new THREE.Vector3(-3.15,0,12.9);
+    const p=yuna?.root.position||new THREE.Vector3(-5.0,0,11.8);
     controls.clearKeys();camera.position.set(p.x,p.y+1.66,p.z+3.55);controls.setOrientation(0,-.025);
     closePanels();lock();toast('YUNA / FREE 360° CHARACTER VIEW')};
   el('btn-yuna-wave').onclick=()=>{yuna?.wave();closePanels();lock();toast('YUNA / HELLO')};
   el('btn-yuna-find').onclick=()=>{
-    controls.clearKeys();const p=yuna?.root.position||new THREE.Vector3(-3.15,0,12.9);camera.position.set(p.x,1.73,p.z+3.35);controls.setOrientation(0,-.04);
+    controls.clearKeys();const p=yuna?.root.position||new THREE.Vector3(-5.0,0,11.8);camera.position.set(p.x,1.73,p.z+3.35);controls.setOrientation(0,-.04);
     closePanels();lock();toast('YUNA / ATRIUM');setLocation();
   };
   el('hair-strength').oninput=e=>yuna?.setHairFlow(e.target.value);
@@ -318,5 +318,5 @@ function animate(){
   if(app.bloom)composer.render();else renderer.render(scene,camera);
 }
 const timeClock=new THREE.Clock();
-async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='MATERIALIZING YUNA';bar.style.width='67%';yuna=createYuna(THREE,scene);addInteract('MEET YUNA',-3.15,1.5,12.9,()=>{yuna.setWander(false);el('btn-yuna-wander').textContent='START WANDERING';openPanel('yuna');yuna.setPose('greet')},2.75);yunaInteraction=interactive[interactive.length-1];status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
+async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='MATERIALIZING YUNA';bar.style.width='67%';yuna=createYuna(THREE,scene);addInteract('MEET YUNA',-5.0,1.5,11.8,()=>{yuna.setWander(false);el('btn-yuna-wander').textContent='START WANDERING';openPanel('yuna');yuna.setPose('greet')},2.75);yunaInteraction=interactive[interactive.length-1];status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
 init();

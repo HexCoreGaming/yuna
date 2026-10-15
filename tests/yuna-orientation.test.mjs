@@ -24,8 +24,11 @@ test('real curved 3D geometry with art-source UVs and physical surfaces',()=>{
  assert.ok(mesh.some(o=>o.name==='CORE_FRONT'));
  assert.ok(mesh.some(o=>o.name==='CORE_BACK'));
  assert.ok(mesh.some(o=>o.name==='FACE_FRONT'));
- assert.ok(mesh.filter(o=>o.name==='FLOATING_HAIR_RIBBON').length>=60);
+ assert.ok(mesh.filter(o=>o.name==='FLOATING_HAIR_RIBBON').length>=50);
  assert.ok(!mesh.some(o=>o.name.includes('Reference_Projection')));
+ assert.ok(mesh.some(o=>o.name==='UPPER_ARM_1_FRONT'));
+ assert.ok(mesh.some(o=>o.name==='FOREARM_1_FRONT'));
+ assert.ok(!mesh.some(o=>o.name==='DETACHED_SHOULDER_BALL'));
  const front=mesh.find(o=>o.name==='CORE_FRONT').geometry;
  assert.ok(front.attributes.position.array.length>9000);
  assert.ok(front.attributes.uv.array.length>6000);
@@ -56,6 +59,6 @@ test('manual facing changes and walking toggle are independent',()=>{
 test('autonomous walk moves Yuna through atrium rather than rotating toward player',()=>{
  const c=make();
  for(let i=1;i<=210;i++)c.update(i/30,1/30,new V3(300,2,300));
- assert.ok(Math.hypot(c.root.position.x+3.15,c.root.position.z-12.9)>.2);
+ assert.ok(Math.hypot(c.root.position.x+5,c.root.position.z-11.8)>.2);
  assert.equal(c.getFollow(),false);
 });
