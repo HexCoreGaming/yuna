@@ -1,0 +1,8 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#091121;color:#fff}#view{height:100vh;width:100vw;display:block}</style></head><body><canvas id="view"></canvas><script type="module">
+import {installFPSControls} from '../src/fps-controls.js';
+const camera={position:{x:0,y:1.73,z:0,clone(){return {x:0,y:0,z:0,set(x,y,z){this.x=x;this.y=y;this.z=z;return this},normalize(){const h=Math.hypot(this.x,this.y,this.z);this.x/=h;this.y/=h;this.z/=h;return this},negate(){this.x=-this.x;this.y=-this.y;this.z=-this.z;return this}}}},rotation:{x:0,y:0,z:0,order:'YXZ',set(x,y,z,order){this.x=x;this.y=y;this.z=z;this.order=order}},getWorldDirection(target){target.x=-Math.sin(this.rotation.y)*Math.cos(this.rotation.x);target.y=Math.sin(this.rotation.x);target.z=-Math.cos(this.rotation.y)*Math.cos(this.rotation.x);return target;}};
+const canvas=document.querySelector('#view');const flags={active:true,locked:false,hotkeys:[]};
+const c=installFPSControls({canvas,camera,isActive:()=>flags.active,onLockChange:v=>flags.locked=v,onHotkey:code=>{flags.hotkeys.push(code);return true}});
+canvas.addEventListener('click',()=>c.lock());
+window.testRig={camera,controls:c,flags,step:(dt=.1,speed=5)=>c.step(dt,speed),reset(yaw=0,pitch=0){c.clearKeys();camera.position.x=0;camera.position.z=0;c.setOrientation(yaw,pitch)},start:()=>c.lock()};
+</script></body></html>

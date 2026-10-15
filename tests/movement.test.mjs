@@ -1,37 +1,51 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { movementDelta } from '../src/movement.js';
-const m=(angle,...codes)=>movementDelta(angle,new Set(codes),5,1);
-const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-9,`${a} should equal ${b}`);
-const expect=(v,x,z)=>{near(v.x,x);near(v.z,z)};
+import { cameraRelativeDelta } from '../src/fps-controls.js';
 
-test('facing north/-Z: W forward, S back, A left, D right',()=>{
- expect(m(0,'KeyW'),0,-5);expect(m(0,'KeyS'),0,5);
- expect(m(0,'KeyA'),-5,0);expect(m(0,'KeyD'),5,0);
+// Stub camera implementing the ACTUAL getWorldDirection API rather than a separate
+// yaw formula hidden in game movement; matches Three.js YXZ mouse-look orientation.
+const camera = (yaw = 0, pitch = 0) => ({
+  position:{clone(){return {x:0,y:0,z:0,set(x,y,z){this.x=x;this.y=y;this.z=z;return this},normalize(){const h=Math.hypot(this.x,this.y,this.z);this.x/=h;this.y/=h;this.z/=h;return this},negate(){this.x=-this.x;this.y=-this.y;this.z=-this.z;return this}}}},
+  getWorldDirection(target) {
+    target.x = -Math.sin(yaw)*Math.cos(pitch);
+    target.y = Math.sin(pitch);
+    target.z = -Math.cos(yaw)*Math.cos(pitch);
+    return target;
+  }
 });
-test('turning right with mouse: W moves where the camera faces',()=>{
- expect(m(-Math.PI/2,'KeyW'),5,0);
- expect(m(-Math.PI/2,'KeyD'),0,5);
- expect(m(-Math.PI/2,'KeyA'),0,-5);
+const m = (yaw,pitch,keys,speed=5,dt=1) => cameraRelativeDelta(camera(yaw,pitch),new Set(keys),speed,dt);
+const near = (a,b) => assert.ok(Math.abs(a-b) < 1e-8, `${a} !== ${b}`);
+const expect = (v,x,z) => {near(v.x,x);near(v.z,z)};
+
+for(const [name,yaw,forward,right] of [
+ ['north',0,[0,-5],[5,0]],
+ ['east',-Math.PI/2,[5,0],[0,5]],
+ ['south',Math.PI,[0,5],[-5,0]],
+ ['west',Math.PI/2,[-5,0],[0,-5]],
+ ['northeast',-Math.PI/4,[5/Math.SQRT2,-5/Math.SQRT2],[5/Math.SQRT2,5/Math.SQRT2]]
+]) test(`${name}: WASD aligned with actual camera`,()=>{
+ expect(m(yaw,0,['KeyW']),...forward);
+ expect(m(yaw,0,['KeyS']),...forward.map(x=>-x));
+ expect(m(yaw,0,['KeyD']),...right);
+ expect(m(yaw,0,['KeyA']),...right.map(x=>-x));
 });
-test('turning left with mouse: W moves where the camera faces',()=>{
- expect(m(Math.PI/2,'KeyW'),-5,0);
- expect(m(Math.PI/2,'KeyD'),0,-5);
+
+test('looking up and looking down does not make WASD fly or reduce speed',()=>{
+ const level=m(-1.2,0,['KeyW']);
+ for(const p of [-1.45,-.7,.7,1.45]) expect(m(-1.2,p,['KeyW']),level.x,level.z);
 });
-test('facing backwards/+Z: WASD orientation follows camera yaw',()=>{
- expect(m(Math.PI,'KeyW'),0,5);expect(m(Math.PI,'KeyD'),-5,0);
+test('same speed for diagonal movement',()=>{
+ for(const a of [0,-.8,1,Math.PI]) near(Math.hypot(...Object.values(m(a,0,['KeyW','KeyD'])).slice(0,2)),5);
 });
-test('diagonal walking normalized (not faster)',()=>{
- const v=m(-Math.PI/4,'KeyW','KeyD');near(Math.hypot(v.x,v.z),5);
+test('opposite keys cancel regardless of angle',()=>{
+ expect(m(-.6,0,['KeyW','KeyS']),0,0);expect(m(.6,0,['KeyA','KeyD']),0,0);
+ expect(m(0,0,[]),0,0);
 });
-test('opposite keys cancel and no keys do not move',()=>{
- expect(m(0,'KeyW','KeyS'),0,0);expect(m(0,'KeyA','KeyD'),0,0);
- expect(m(0),0,0);
+test('sprint speed and frame time',()=>{
+ const a=m(0,0,['KeyW'],5,.02),b=m(0,0,['KeyW'],5,.01),s=m(0,0,['KeyW'],8.5,1);
+ near(a.z,2*b.z); near(s.z,-8.5);
 });
-test('frame-rate independence and sprint speed',()=>{
- const k=new Set(['KeyW']);const a=movementDelta(0,k,5,.02);const b=movementDelta(0,k,5,.01);near(a.z,2*b.z);
- const fast=movementDelta(0,k,8.5,1);near(Math.hypot(fast.x,fast.z),8.5);
-});
-test('arrow-key movement matches WASD',()=>{
- const a=m(-.8,'ArrowUp');const b=m(-.8,'KeyW');expect(a,b.x,b.z);
+test('arrow keys match WASD',()=>{
+ expect(m(.65,0,['ArrowUp']),...Object.values(m(.65,0,['KeyW'])).slice(0,2));
+ expect(m(.65,0,['ArrowLeft']),...Object.values(m(.65,0,['KeyA'])).slice(0,2));
 });
