@@ -247,16 +247,17 @@ function events(){
   function line(){el('yuna-dialogue').textContent='“'+yunaLines[previewLine++%yunaLines.length]+'”';}
   el('btn-yuna').onclick=()=>openPanel('yuna');
   el('btn-yuna-line').onclick=()=>{line();yuna?.setPose('greet')};
-  function characterMode(v){yuna?.setDisplayMode(v);el('btn-projection').classList.toggle('active',v==='reference');el('btn-sculpt').classList.toggle('active',v==='model');el('display-explainer').textContent=v==='reference'?'2D: approved appearance projected into the room from four viewpoints. It is image-based, not a rigged mesh.':'3D: a procedural sculpted body with animated floating hair, idle movement and articulated arms. This is NOT a scan of the approved artwork.';el('yuna-status-bubble').querySelector('small').textContent=v==='reference'?'2D APPROVED ART PROJECTION':'3D PROCEDURAL PROTOTYPE';}
-  el('btn-projection').onclick=()=>characterMode('reference');
-  el('btn-sculpt').onclick=()=>characterMode('model');
-  el('btn-yuna-wave').onclick=()=>{if(yuna?.getDisplayMode()==='reference')characterMode('model');yuna?.wave();closePanels();lock();toast('YUNA / HELLO')};
+  // The displayed character is always a 3D mesh. Approved art is only in the
+  // reference overlay and never replaces her body with an image plane.
+  el('btn-yuna-left').onclick=()=>yuna?.rotateBy(-Math.PI/4);
+  el('btn-yuna-right').onclick=()=>yuna?.rotateBy(Math.PI/4);
+  el('btn-yuna-reset-facing').onclick=()=>yuna?.resetFacing();
+  el('btn-yuna-wave').onclick=()=>{yuna?.wave();closePanels();lock();toast('YUNA / HELLO')};
   el('btn-yuna-find').onclick=()=>{
     controls.clearKeys();camera.position.set(-3.2,1.73,16.5);controls.setOrientation(0,-.04);
     closePanels();lock();toast('YUNA / ATRIUM');setLocation();
   };
   el('hair-strength').oninput=e=>yuna?.setHairFlow(e.target.value);
-  el('yuna-look').onchange=e=>yuna?.setFollow(e.target.checked);
   el('btn-character-reference').onclick=()=>el('character-reference-overlay').classList.remove('hidden');
   el('close-character-reference').onclick=()=>el('character-reference-overlay').classList.add('hidden');
   el('character-reference-overlay').addEventListener('click',e=>{if(e.target.id==='character-reference-overlay')e.currentTarget.classList.add('hidden')});

@@ -1,4 +1,4 @@
-// YUNA // Visual Construct v0.3
+// YUNA // Three-dimensional visual construct v0.6
 // Procedural 3D character (NOT a photo-perfect scan of the 2D concept artwork).
 // Runtime: Three.js 0.166. No remote AI, tracking, network calls, or external model files.
 export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
@@ -78,7 +78,14 @@ export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
         const c1=Math.exp(-Math.pow((x-.14)/.13,2)-Math.pow((y-1.46)/.12,2));
         const c2=Math.exp(-Math.pow((x+.14)/.13,2)-Math.pow((y-1.46)/.12,2));
         if(Math.cos(a)>.1)z+=.055*(c1+c2)*Math.pow(Math.max(0,Math.cos(a)),2);
-        if(Math.cos(a)<-.25)z-=.053*Math.exp(-Math.pow((y-1.04)/.13,2))*Math.abs(Math.cos(a));
+        // Rear silhouette is part of the actual sculpted THREE-DIMENSIONAL mesh.
+        // Increase the posterior roundness *behind* the pelvis, not the hip width.
+        // Twin soft contours blend into the upper thighs rather than adding spheres.
+        if(Math.cos(a)<-.09){
+          const level=Math.exp(-Math.pow((y-1.038)/.144,2));
+          const lobe=Math.exp(-Math.pow((Math.abs(x)-.155)/.172,2));
+          z-=.177*level*lobe*Math.pow(Math.max(0,-Math.cos(a)),.67);
+        }
         v.push(x,y,z);uv.push(j/sides,i/rows);
         if(i<rows&&j<sides){const p=i*(sides+1)+j;ind.push(p,p+1,p+sides+1,p+1,p+sides+2,p+sides+1)}
       }
@@ -88,8 +95,7 @@ export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
   makeTorso();
   // Smooth doll-like lower-body panels; no anatomically explicit textures/details.
   const shortPanel=orb(0,.946,.183,.27,.13,.055,sheen);shortPanel.rotation.x=-.12;
-  // Rear contours are separate volume for soft rounded silhouette, not widening the hip bones.
-  for(const sign of [-1,1]) orb(sign*.148,1.028,-.178,.178,.194,.168,skin);
+  // The rear contours are now sculpted into makeTorso; no detached spherical shells.
   // Legs with ankle taper, calf contour, and formed feet.
   for(const side of [-1,1]){
     taperTube([[side*.19,.96,0],[side*.205,.74,.018],[side*.195,.49,.014],[side*.184,.27,-.011],[side*.18,.11,-.01]], [.16,.152,.112,.091,.064],skin);
@@ -194,55 +200,26 @@ export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
     const m=mesh(new THREE.SphereGeometry(.008+(i%4)*.004,5,4),i%3?cyan:purple,floater);
     m.position.set(Math.cos(a)*r,y,Math.sin(a)*r);motes.push({m,phase:i*.71});
   }
-  // Accurate-to-artwork, four-angle image-based projection. This is a 2D impostor,
-  // clearly distinguished in UI from the fully modeled 3D prototype.
-  const threeDChildren = root.children.slice();
-  const projection = new THREE.Group();projection.name='Yuna_2D_Reference_Projection';root.add(projection);
-  const previewPlanes=[];
-  for(let i=0;i<4;i++){
-    const texture=new THREE.TextureLoader().load('./assets/yuna-view-'+i+'.webp');
-    texture.colorSpace=THREE.SRGBColorSpace;
-    texture.anisotropy=8;
-    const aspect=[321,321,316,366][i]/883;
-    const plane=new THREE.Mesh(new THREE.PlaneGeometry(2.17*aspect,2.17),new THREE.MeshBasicMaterial({map:texture,transparent:true,alphaTest:.05,depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));
-    plane.position.y=1.087;
-    plane.visible=i===0;
-    plane.renderOrder=4;
-    projection.add(plane);
-    previewPlanes.push(plane);
-  }
-  let displayMode='reference';
-  function setDisplayMode(v){
-    displayMode=v==='model'?'model':'reference';
-    for(const ch of threeDChildren){if(ch!==halo&&ch!==floater&&ch!==accent)ch.visible=displayMode==='model';}
-    projection.visible=displayMode==='reference';
-    return displayMode;
-  }
-  setDisplayMode('reference');
-  let pose='idle',waveUntil=0,lookAt=true,hairFlow=1,visibility=true,lastT=0,faceRotation=0;
+  // Yuna is always rendered as true 3D geometry. Her approved four-view
+  // artwork remains accessible in the character panel, not projected as a flat
+  // plane in the world. You can freely walk around her from every angle.
+  const displayMode='model';
+  function setDisplayMode(){return 'model';}
+  function rotateBy(angle){root.rotation.y+=Number(angle)||0;faceRotation=root.rotation.y;}
+  function resetFacing(){root.rotation.y=0;faceRotation=0;}
+  let faceRotation=0;
+  let pose='idle',waveUntil=0,lookAt=false,hairFlow=1,visibility=true,lastT=0;
   function wave(){pose='wave';waveUntil=lastT+2.8;}
   function setPose(value){pose=value;waveUntil=(value==='wave'||value==='greet')?lastT+2.8:0;}
   function setHairFlow(v){hairFlow=Number(v);}
-  function setFollow(v){lookAt=Boolean(v);}
+  function setFollow(v){lookAt=false;/* Yuna never auto-tracks the camera. */}
   function setVisible(v){visibility=Boolean(v);root.visible=visibility;}
   function update(t,dt,cameraPos){
     lastT=t;
     const alive=t*.56;
     if(pose!=='idle' && t>waveUntil)pose='idle';
-    if(lookAt && cameraPos){
-      const target=Math.atan2(cameraPos.x-root.position.x,cameraPos.z-root.position.z);
-      let diff=Math.atan2(Math.sin(target-faceRotation),Math.cos(target-faceRotation));
-      faceRotation+=THREE.MathUtils.clamp(diff,-dt*1.2,dt*1.2);
-      root.rotation.y=faceRotation;
-    }
-    if(displayMode==='reference'){
-      let relative=Math.atan2(cameraPos.x-root.position.x,cameraPos.z-root.position.z)-root.rotation.y;
-      relative=Math.atan2(Math.sin(relative),Math.cos(relative));
-      const a=Math.abs(relative);
-      let view=a<Math.PI/4?0:(a>Math.PI*3/4?3:(relative<0?1:2));
-      previewPlanes.forEach((p,i)=>{p.visible=i===view;p.rotation.y=relative});
-      projection.position.y=Math.sin(t*.8)*.006;
-    }
+    // IMPORTANT: She remains facing her own direction, independent of where
+    // the player stands. No camera-facing billboards or automatic yaw tracking.
     // Hover remains extremely subtle so her feet visually touch the floor.
     const bob=Math.sin(alive*1.7)*.006;
     const blink=(t%6.3>5.99)?Math.max(.09,Math.abs(t%6.3-6.145)*9):1;
@@ -267,5 +244,7 @@ export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
     for(const p of motes){p.m.position.y+=(Math.sin(t*.6+p.phase)-Math.sin((t-dt)*.6+p.phase))*.06;}
     accent.intensity=2.0+Math.sin(t*1.1)*.24;
   }
-  return {root,update,wave,setPose,setHairFlow,setFollow,setVisible,setDisplayMode,getDisplayMode:()=>displayMode,getPose:()=>pose,getFollow:()=>lookAt,getHairFlow:()=>hairFlow};
+  return {root,update,wave,setPose,setHairFlow,setFollow,setVisible,
+    setDisplayMode,getDisplayMode:()=>displayMode,rotateBy,resetFacing,
+    getPose:()=>pose,getFollow:()=>false,getHairFlow:()=>hairFlow};
 }
