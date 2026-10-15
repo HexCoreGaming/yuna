@@ -1,250 +1,289 @@
-// YUNA // Three-dimensional visual construct v0.6
-// Procedural 3D character (NOT a photo-perfect scan of the 2D concept artwork).
-// Runtime: Three.js 0.166. No remote AI, tracking, network calls, or external model files.
-export function createYuna(THREE, scene, location = {x:-3.15,z:12.9}) {
-  const root = new THREE.Group();
-  root.name = 'Yuna_Visual_Construct';
-  root.position.set(location.x, 0.20, location.z);
-  scene.add(root);
+// YUNA // Sculpted holographic character and procedural animation.
+// Four illustrated orthographic source views are UV-projected onto CURVED 3D geometry.
+// This is a real 3D mesh with volume, animation and secondary-motion springs—not a billboard.
+// It remains a stylized artwork-based mesh, NOT a scan, professional hand-sculpt, or trained AI.
 
-  // Physically modeled figure; the project keeps the original approved turnaround
-  // alongside it because single-sheet art is not a rigged 3D asset.
-  const skin = new THREE.MeshPhysicalMaterial({
-    color:0x8f94f3, emissive:0x344cab, emissiveIntensity:0.58,
-    metalness:.24, roughness:.24, clearcoat:1, clearcoatRoughness:.08,
-    transparent:true, opacity:.94, side:THREE.DoubleSide, depthWrite:true,
-  });
-  const sheen = new THREE.MeshPhysicalMaterial({color:0x859beb, emissive:0x486bcd, emissiveIntensity:.7, metalness:.35, roughness:.15, transparent:true, opacity:.96, clearcoat:1});
-  const hairmat = new THREE.MeshPhysicalMaterial({color:0x4939ae, emissive:0x3d3dd0, emissiveIntensity:.88, metalness:.42, roughness:.18, clearcoat:1});
-  const hairThin = new THREE.MeshBasicMaterial({color:0x70dbff, transparent:true, opacity:.76, depthWrite:false});
-  const purple = new THREE.MeshBasicMaterial({color:0xb5a1ff, toneMapped:false});
-  const cyan = new THREE.MeshBasicMaterial({color:0x6ee5ff, toneMapped:false});
-  const navy = new THREE.MeshPhysicalMaterial({color:0x1a1652, metalness:.62, roughness:.23, transparent:true, opacity:.94, emissive:0x26285b, emissiveIntensity:.38});
-  const eyeWhite = new THREE.MeshBasicMaterial({color:0xc7edff});
-  const iris = new THREE.MeshBasicMaterial({color:0x63c8ff, toneMapped:false});
-  const pupil = new THREE.MeshBasicMaterial({color:0x101536});
-  const lip = new THREE.MeshPhysicalMaterial({color:0xb5a3ff, metalness:.28, roughness:.28, emissive:0x4a2b6a, emissiveIntensity:.2});
-  const metal = new THREE.MeshStandardMaterial({color:0x1c2548,metalness:.88,roughness:.18});
+export function createYuna(THREE, scene, location={x:-3.15,z:12.9}) {
+  const root=new THREE.Group();root.name='YUNA / DIGITAL ENTITY';root.position.set(location.x,0.18,location.z);scene.add(root);
+  const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
+  const smooth=(a,b,t)=>a+(b-a)*Math.max(0,Math.min(1,t));
+  const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+  const load=(file)=>{const t=new THREE.TextureLoader().load('./assets/yuna-'+file+'-surface.webp');t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.anisotropy=8;return t};
+  const surf={front:load('front'),left:load('left'),right:load('right'),back:load('back')};
+  const skin={};
+  const skinSettings={color:0xd2c9ff,roughness:.25,metalness:.17,clearcoat:.9,clearcoatRoughness:.14,side:THREE.DoubleSide,emissive:0x3641b7,emissiveIntensity:.25};
+  for(const k of Object.keys(surf))skin[k]=new THREE.MeshPhysicalMaterial({...skinSettings,map:surf[k]});
+  const flesh=new THREE.MeshPhysicalMaterial({color:0x8d91f1,roughness:.22,metalness:.19,clearcoat:1,emissive:0x3e3db6,emissiveIntensity:.6,side:THREE.DoubleSide});
+  const glow=new THREE.MeshBasicMaterial({color:0x8dbdff,toneMapped:false});
+  const violet=new THREE.MeshBasicMaterial({color:0xc59cff,toneMapped:false});
+  const cyan=new THREE.MeshBasicMaterial({color:0x62dbff,toneMapped:false});
+  const hairBase=new THREE.MeshPhysicalMaterial({color:0x343599,roughness:.19,metalness:.35,clearcoat:1,clearcoatRoughness:.11,emissive:0x302d9c,emissiveIntensity:.67,side:THREE.DoubleSide});
+  const hairLit=new THREE.MeshPhysicalMaterial({color:0x8982ef,roughness:.2,metalness:.35,clearcoat:1,emissive:0x3e5cbc,emissiveIntensity:.7,side:THREE.DoubleSide});
+  const headTrim=new THREE.MeshStandardMaterial({color:0x151938,metalness:.55,roughness:.22,emissive:0x303c76,emissiveIntensity:.48});
+  const faceTexture=new THREE.TextureLoader().load('./assets/yuna-face-detail.webp');faceTexture.colorSpace=THREE.SRGBColorSpace;
+  const faceMat=new THREE.MeshPhysicalMaterial({...skinSettings,color:0xe9dfff,map:faceTexture,emissive:0x3438a2,emissiveIntensity:.16});
 
-  function mesh(geo,mat,parent=root,name='') {const o = new THREE.Mesh(geo,mat);o.name=name;o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
-  function orb(x,y,z,sx,sy,sz,mat=skin,parent=root,name='') {
-    const o=mesh(new THREE.SphereGeometry(1,32,20),mat,parent,name);
-    o.position.set(x,y,z);o.scale.set(sx,sy,sz);return o;
+  const meshes=[];
+  function add(geo,mat,parent=root,name=''){const m=new THREE.Mesh(geo,mat);m.name=name;m.castShadow=true;m.receiveShadow=true;parent.add(m);meshes.push(m);return m}
+  function ball(parent,x,y,z,sx,sy,sz,mat=flesh){const m=add(new THREE.SphereGeometry(1,32,24),mat,parent);m.position.set(x,y,z);m.scale.set(sx,sy,sz);return m}
+  function line(parent,arr,r,mat=cyan){const cr=new THREE.CatmullRomCurve3(arr.map(p=>V(...p)));return add(new THREE.TubeGeometry(cr,Math.max(24,arr.length*8),r,6,false),mat,parent)}
+  // Smooth lofts following an artist-defined full-figure profile; rings are interpolated with cubic blending.
+  // The x radius is kept fixed while posterior profiles add gluteal volume *backwards*, not sideways.
+  function fromKeys(keys,y){let i=0;while(i<keys.length-2&&y>keys[i+1][0])i++;const a=keys[i],b=keys[i+1];let t=clamp((y-a[0])/(b[0]-a[0]),0,1);t=t*t*(3-2*t);return [smooth(a[1],b[1],t),smooth(a[2],b[2],t),smooth(a[3],b[3],t)];}
+  const textureUV=(view,x,y,z)=>{
+    // Pixel anchors are mapped into the provided orthographic design views.
+    // y is always in world meters from the bottoms of her feet.
+    let xp;
+    if(view==='front')xp=244+x*440;
+    else if(view==='back')xp=1373-x*430;
+    else if(view==='left')xp=617+z*365;
+    else xp=993-z*362;
+    const rect={front:[63,430],left:[467,775],right:[849,1150],back:[1180,1565]}[view];
+    const u=clamp((xp-rect[0])/(rect[1]-rect[0]),.018,.982);
+    const imageY=884-y*(863/2.12);
+    return [u,clamp(1-imageY/894,.014,.986)];
+  };
+  // Separate quadrant surfaces with continuous shared edges. Each uses its proper reference view.
+  function loft(parent,name,keys,centerY=0,segmentsY=96,animateMorph=false,offsetX=0,offsetZ=0,textureX=0){
+    const patches=[];const orders=[
+      {view:'front',from:-Math.PI/4,to:Math.PI/4},
+      {view:'right',from:Math.PI/4,to:3*Math.PI/4},
+      {view:'back',from:3*Math.PI/4,to:5*Math.PI/4},
+      {view:'left',from:5*Math.PI/4,to:7*Math.PI/4}];
+    const y0=keys[0][0],y1=keys[keys.length-1][0];
+    for(const q of orders){
+      const a=[],uv=[],ix=[],morphFront=[],morphBack=[],partN=28;
+      for(let j=0;j<=segmentsY;j++){
+        const y=y0+(y1-y0)*(j/segmentsY),[w,d,zc]=fromKeys(keys,y);
+        for(let k=0;k<=partN;k++){
+          const theta=q.from+(q.to-q.from)*k/partN;
+          let x=Math.sin(theta)*w+offsetX,z=Math.cos(theta)*d+zc+offsetZ;
+          // Smooth chest and lower rear anatomy integrated into the continuous skin.
+          let bust=0,glute=0;
+          if(name==='CORE'){
+            const frontal=Math.pow(Math.max(0,Math.cos(theta)),2);
+            const back=Math.pow(Math.max(0,-Math.cos(theta)),2);
+            const lobe=Math.exp(-Math.pow((Math.abs(x)-.14)/.115,2));
+            bust=Math.exp(-Math.pow((y-1.48)/.12,2))*lobe*frontal;
+            glute=Math.exp(-Math.pow((y-1.00)/.15,2))*Math.exp(-Math.pow((Math.abs(x)-.15)/.20,2))*back;
+            z+=.094*bust-.192*glute;
+          }
+          a.push(x,y-centerY,z);morphFront.push(bust);morphBack.push(glute);
+          const [u,v]=textureUV(q.view,x+textureX,y,z);uv.push(u,v);
+          if(j<segmentsY&&k<partN){const i=j*(partN+1)+k;
+            ix.push(i,i+1,i+partN+1, i+1,i+partN+2,i+partN+1)}
+        }
+      }
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();
+      const part=add(g,skin[q.view],parent,name+'_'+q.view.toUpperCase());
+      patches.push({geo:g,rest:Float32Array.from(a),bust:morphFront,rear:morphBack});
+    }
+    return {patches};
   }
-  function tube(points,r,material=skin,parent=root,segments=24) {
-    const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
-    const o=mesh(new THREE.TubeGeometry(curve,segments,r,7,false),material,parent);
+  const core=new THREE.Group();core.position.y=.96;root.add(core);
+  const torsoKeys=[[.85,.265,.19,-.01],[.94,.31,.223,-.015],[1.045,.316,.229,-.009],
+    [1.14,.268,.184,.008],[1.22,.189,.136,.005],[1.30,.181,.130,.007],
+    [1.39,.232,.152,0],[1.48,.280,.161,.004],[1.58,.284,.154,-.018],
+    [1.65,.204,.128,-.012],[1.705,.081,.079,0]];
+  const body=loft(core,'CORE',torsoKeys,.96,105,true);
+  // Synthetic skin panels provide non-explicit coverage, integrated in the skin palette.
+  const collarTrim=new THREE.Group();core.add(collarTrim);
+  for(const s of [-1,1]){
+    line(collarTrim,[[s*.2,.62,.15],[s*.13,.66,.19],[0,.68,.1]],.0028,glow);
+    line(collarTrim,[[s*.16,.58,.2],[s*.11,.52,.249],[s*.04,.50,.21]],.005,violet);
+  }
+  // Neck, sculpted curved face, ears, hairline. The actual face is textured using the approved art.
+  const neck=loft(core,'NECK',[[1.64,.075,.077,0],[1.76,.063,.061,.008],[1.82,.072,.076,.018]],.96,26);
+  const head=new THREE.Group();head.position.set(0,.91,.008);core.add(head);
+  const headKeys=[[1.76,.064,.066,.026],[1.79,.095,.102,.013],[1.86,.121,.122,0],[1.95,.131,.122,-.002],[2.04,.128,.110,-.011],[2.10,.099,.089,-.018],[2.126,.038,.062,-.018]];
+  // UV-projected real face on a 3D surface, not a flat quad.
+  const faceWrap=loft(head,'FACE',headKeys,1.87,65);
+  for(const p of faceWrap.patches){p.geo.computeBoundingSphere();}
+  for(const side of [-1,1]){
+    ball(head,side*.13,.068,-.01,.023,.056,.039,flesh);
+    line(head,[[side*.14,.052,.007],[side*.162,.039,.018],[side*.148,.024,.017]],.005,cyan);
+  }
+  // Eye-shutter is a transparent illuminated lid which can blink without erasing the face painting.
+  const eyelids=[];
+  for(const side of [-1,1]){
+    const lid=ball(head,side*.056,.05,.113,.042,.003,.014,hairLit);lid.visible=false;eyelids.push(lid);
+  }
+  // Hair: sculpted crown volumes + physical-looking ribbon-strand geometry.
+  const hairRoot=new THREE.Group();hairRoot.position.set(0,.14,-.045);head.add(hairRoot);
+  ball(hairRoot,0,.08,-.032,.153,.105,.138,hairBase);
+  ball(hairRoot,.058,.173,-.082,.092,.089,.086,hairBase);
+  for(let k=0;k<8;k++){
+    const r=.056+.004*k;
+    line(hairRoot,Array.from({length:16},(_,i)=>{let t=i/15*1.65*Math.PI;return [.058+Math.cos(t)*r,.173+Math.sin(t)*r,-.002-k*.006]}),.005,k%2?cyan:hairLit);
+  }
+  const hair=[];
+  // Deformable tapered triangulated ribbons: each strand bends under gravity, inertia, underwater current.
+  function ribbon(anchor,length,width,phase,tint,i){
+    const count=13,verts=[],ind=[],cols=[];
+    for(let j=0;j<count;j++){
+      for(let k=0;k<2;k++){verts.push(0,0,0);cols.push(1,1,1)}
+      if(j<count-1){const p=j*2;ind.push(p,p+2,p+1,p+1,p+2,p+3)}
+    }
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(ind);geo.computeVertexNormals();
+    const material=i%5===0?hairLit:hairBase;const o=add(geo,material,hairRoot,'FLOATING_HAIR_RIBBON');
+    const points=Array.from({length:count},(_,j)=>V(anchor.x,anchor.y-length*j/(count-1),anchor.z));
+    hair.push({geo,points,anchor,length,width,phase,tint,i});
     return o;
   }
-  function taperTube(points,rads,mat,parent=root) {
-    // Continuous organic limb tube, smoothly blended by interpolating point/radius values.
-    const cr=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));
-    const n=42, k=12, vs=[], ns=[], uvs=[], ids=[];
-    for(let i=0;i<=n;i++){
-      const t=i/n,pt=cr.getPoint(t),tg=cr.getTangent(t).normalize();
-      let axis=new THREE.Vector3(1,0,0);if(Math.abs(axis.dot(tg))>.91)axis.set(0,0,1);
-      let a=new THREE.Vector3().crossVectors(tg,axis).normalize(),b=new THREE.Vector3().crossVectors(tg,a).normalize();
-      const seg=Math.min(rads.length-2,Math.floor(t*(rads.length-1)));
-      const f=t*(rads.length-1)-seg, r=THREE.MathUtils.lerp(rads[seg],rads[seg+1],f);
-      for(let j=0;j<=k;j++){
-        const ang=j/k*Math.PI*2,off=a.clone().multiplyScalar(Math.cos(ang)*r).addScaledVector(b,Math.sin(ang)*r);
-        const q=pt.clone().add(off);vs.push(q.x,q.y,q.z);ns.push(off.x/r,off.y/r,off.z/r);uvs.push(j/k,t);
-        if(i<n&&j<k){const q0=i*(k+1)+j;ids.push(q0,q0+k+1,q0+1,q0+1,q0+k+1,q0+k+2)}
-      }
-    }
-    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vs,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(ns,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geo.setIndex(ids);geo.computeVertexNormals();return mesh(geo,mat,parent);
+  for(let i=0;i<64;i++){
+    const angle=i*2.3999632297;let x=Math.sin(angle)*(.07+(i%9)*.005),z=Math.cos(angle)*(.065+(i%6)*.005);
+    const len=.27+(i%13)*.048;
+    ribbon(V(x,.125+Math.sin(i*.43)*.025,z-.015),len,.006+(i%4)*.0025,i*.83,1,i);
   }
-
-  // A continuous feminine torso/pelvis, rather than stacks of primitive boxes.
-  function makeTorso(){
-    const rings=[
-      [.87,.295,.202,-.017],[.94,.339,.222,-.012],[1.04,.340,.237,-.012],
-      [1.13,.295,.215,.010],[1.22,.213,.150,.010],[1.30,.190,.139,.008],
-      [1.39,.221,.160,.004],[1.49,.273,.166,-.005],[1.59,.296,.159,-.013],
-      [1.65,.216,.134,-.011],[1.70,.094,.083,-.018]];
-    const v=[],uv=[],ind=[];const sides=48,rows=78;
-    const get=(y)=>{
-      for(let i=0;i<rings.length-1;i++)if(y<=rings[i+1][0]){
-        const a=rings[i],b=rings[i+1],f=(y-a[0])/(b[0]-a[0]),e=f*f*(3-2*f);
-        return [THREE.MathUtils.lerp(a[1],b[1],e),THREE.MathUtils.lerp(a[2],b[2],e),THREE.MathUtils.lerp(a[3],b[3],e)];
-      }return rings[rings.length-1].slice(1);
-    };
-    for(let i=0;i<=rows;i++){
-      const y=.87+(1.70-.87)*i/rows,[wx,rz,zoffset]=get(y);
-      for(let j=0;j<=sides;j++){
-        const a=2*Math.PI*j/sides;
-        let x=Math.sin(a)*wx,z=Math.cos(a)*rz+zoffset;
-        // Small integrated anterior chest contours, and rounded posterior pelvis.
-        const c1=Math.exp(-Math.pow((x-.14)/.13,2)-Math.pow((y-1.46)/.12,2));
-        const c2=Math.exp(-Math.pow((x+.14)/.13,2)-Math.pow((y-1.46)/.12,2));
-        if(Math.cos(a)>.1)z+=.055*(c1+c2)*Math.pow(Math.max(0,Math.cos(a)),2);
-        // Rear silhouette is part of the actual sculpted THREE-DIMENSIONAL mesh.
-        // Increase the posterior roundness *behind* the pelvis, not the hip width.
-        // Twin soft contours blend into the upper thighs rather than adding spheres.
-        if(Math.cos(a)<-.09){
-          const level=Math.exp(-Math.pow((y-1.038)/.144,2));
-          const lobe=Math.exp(-Math.pow((Math.abs(x)-.155)/.172,2));
-          z-=.177*level*lobe*Math.pow(Math.max(0,-Math.cos(a)),.67);
-        }
-        v.push(x,y,z);uv.push(j/sides,i/rows);
-        if(i<rows&&j<sides){const p=i*(sides+1)+j;ind.push(p,p+1,p+sides+1,p+1,p+sides+2,p+sides+1)}
-      }
-    }
-    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(ind);geo.computeVertexNormals();return mesh(geo,skin,root,'Yuna_Sculpted_Torso');
+  // Facial framing locks curl along cheekbones, floating past jawline.
+  for(const s of [-1,1])for(let i=0;i<4;i++)ribbon(V(s*(.10+i*.012),.125,.090-i*.018),.32+i*.047,.009,i*.8,1,70+i);
+  for(let i=0;i<15;i++){
+    const x=(i-7)*.018;
+    line(hairRoot,[[x,.155,.090],[x+.02,.12,.120],[x+.04,.06,.124],[x+.032,-.012,.121]],.008+i%3*.002,i%4?hairBase:hairLit);
   }
-  makeTorso();
-  // Smooth doll-like lower-body panels; no anatomically explicit textures/details.
-  const shortPanel=orb(0,.946,.183,.27,.13,.055,sheen);shortPanel.rotation.x=-.12;
-  // The rear contours are now sculpted into makeTorso; no detached spherical shells.
-  // Legs with ankle taper, calf contour, and formed feet.
+  // Legs: proper hip and knee joints. Both side and frontal surfaces use the original reference texture.
+  const legs=[];
   for(const side of [-1,1]){
-    taperTube([[side*.19,.96,0],[side*.205,.74,.018],[side*.195,.49,.014],[side*.184,.27,-.011],[side*.18,.11,-.01]], [.16,.152,.112,.091,.064],skin);
-    const foot=orb(side*.18,.062,.082,.093,.056,.197,skin);foot.rotation.x=.10;
-    for(let k=0;k<4;k++)orb(side*.18+(k-1.5)*.038,.055,.241+(k===0?.011:0),.018,.024,.043,sheen);
-    // Energy trail down each leg.
-    tube([[side*.22,.85,.145],[side*.22,.60,.125],[side*.188,.37,.105],[side*.185,.14,.083]],.005,cyan,root,32);
+    const hip=new THREE.Group();hip.position.set(side*.175,.92,-.005);root.add(hip);
+    // upper leg modeled in resting *world y* then centered at the hip so rotation is natural.
+    const upper=loft(hip,'THIGH_'+side,[[.47,.103,.108,.016],[.59,.125,.13,.011],[.71,.15,.154,.014],[.85,.16,.16,.01],[.99,.134,.143,.01]],.92,52,false,0,0,side*.175);
+    const knee=new THREE.Group();knee.position.set(0,-.43,0);hip.add(knee);
+    const lower=loft(knee,'CALF_'+side,[[.09,.073,.070,-.004],[.21,.091,.093,-.012],[.35,.104,.102,-.008],[.49,.084,.09,0]],.49,48,false,0,0,side*.175);
+    const ankle=new THREE.Group();ankle.position.set(0,-.40,0);knee.add(ankle);
+    ball(ankle,0,-.029,.095,.099,.055,.194,flesh);
+    for(let j=0;j<5;j++)ball(ankle,(j-2)*.031,-.049,.234,.016,.020,.045,flesh);
+    line(hip,[[0,-.04,.12],[side*.015,-.21,.125],[side*-.007,-.39,.10]],.004,cyan);
+    legs.push({hip,knee,ankle,side});
   }
-  // Chest: integrated holographic top with exactly the same palette as the body.
-  // Opaque enough to read as coverage while retaining a seamless synthetic appearance.
-  for(const side of [-1,1]){
-    const bust=orb(side*.136,1.466,.139,.133,.129,.14,sheen);
-    bust.rotation.z=side*-.05;
-    const seam=tube([[side*.045,1.484,.246],[side*.12,1.414,.287],[side*.215,1.463,.231]],.006,purple);
-  }
-  // Collar/neck and delicate illuminated collarbones.
-  taperTube([[0,1.63,-.01],[0,1.708,0],[0,1.782,.002]],[.092,.068,.07],skin);
-  for(const side of [-1,1])tube([[0,1.65,.095],[side*.12,1.643,.129],[side*.24,1.601,.095]],.005,cyan);
-
-  // Head with tapered jaw + luminous eyes, face on +Z.
-  const head=new THREE.Group();head.position.set(0,1.872,.006);root.add(head);
-  const skull=orb(0,.020,0,.138,.192,.132,skin,head,'Yuna_Face');
-  orb(0,-.105,.047,.101,.091,.088,skin,head); // tapered chin overlay
-  for(const side of [-1,1]){
-    orb(side*.134,.005,-.005,.021,.055,.031,skin,head);
-    const eyeGroup=new THREE.Group();eyeGroup.position.set(side*.058,.025,.121);head.add(eyeGroup);
-    orb(0,-.002,.003,.045,.025,.021,eyeWhite,eyeGroup);
-    orb(0,0,.023,.024,.023,.009,iris,eyeGroup);
-    orb(0,0,.033,.009,.017,.006,pupil,eyeGroup);
-    orb(side*.006,.009,.038,.006,.006,.004,cyan,eyeGroup);
-    const brow=tube([[side*.025,.083,.126],[side*.065,.091,.133],[side*.11,.078,.106]],.006,hairmat,head);
-    // blinking scales the visible eye group via pupil/eye anchor; full layer omitted intentionally
-    if(!head.userData.eyes)head.userData.eyes=[];head.userData.eyes.push(eyeGroup);
-  }
-  orb(0,-.034,.143,.024,.061,.029,skin,head); // small nose
-  orb(0,-.098,.150,.047,.013,.016,lip,head);
-  orb(0,-.111,.143,.044,.012,.014,lip,head);
-  // Finely tapered brows, cheek illumination, illuminated temple seams.
-  for(const side of [-1,1])tube([[side*.119,.074,.07],[side*.129,.008,.099],[side*.112,-.066,.106]],.003,cyan,head,15);
-
-  // Arms use pivot groups, so the right hand can actually wave.
+  // Arms: upper-arm pivot and hinged elbow, supported by UV-projected volume.
   const arms=[];
   for(const side of [-1,1]){
-    const pivot=new THREE.Group();pivot.position.set(side*.296,1.613,0);root.add(pivot);
-    orb(0,-.025,0,.103,.116,.105,skin,pivot);
-    taperTube([[0,-.045,0],[side*.08,-.24,.012],[side*.095,-.45,.015],[side*.08,-.605,.041]], [.092,.083,.068,.050],skin,pivot);
-    const hand=orb(side*.08,-.652,.047,.072,.092,.033,skin,pivot);
-    for(let k=0;k<4;k++)taperTube([[side*.08+(k-1.5)*.023,-.696,.056],[side*.08+(k-1.5)*.023,-.76+Math.abs(k-1.5)*.012,.068]],[.016,.010],skin,pivot);
-    taperTube([[side*.055,-.624,.078],[side*.019,-.685,.1]],[.025,.013],skin,pivot);
-    tube([[side*.067,-.14,.077],[side*.11,-.33,.080],[side*.085,-.56,.089]],.004,cyan,pivot,20);
-    arms.push({pivot,side});
+    const shoulder=new THREE.Group();shoulder.position.set(side*.281,.645,0);core.add(shoulder);
+    ball(shoulder,0,-.01,0,.091,.100,.092,flesh);
+    const armUpper=loft(shoulder,'UPPER_ARM_'+side,[[1.28,.078,.072,.005],[1.45,.089,.082,.008],[1.60,.084,.083,0],[1.65,.048,.06,0]],1.62,43,false,0,0,side*.281);
+    // Limb geometry is rendered relative to the pivot, with elbow hinge at -0.34m.
+    const elbow=new THREE.Group();elbow.position.set(side*.012,-.33,.015);shoulder.add(elbow);
+    const fore=new THREE.Group();fore.position.set(0,-.14,0);elbow.add(fore);
+    ball(fore,side*.012,-.14,.014,.054,.20,.057,flesh);
+    ball(fore,side*.018,-.35,.031,.057,.083,.039,flesh);
+    for(let finger=0;finger<4;finger++)ball(fore,side*.012+(finger-1.5)*.028,-.434+(finger%2)*.012,.039,.011,.062,.015,flesh);
+    line(shoulder,[[0,-.03,.075],[side*.012,-.18,.092],[side*.01,-.32,.08]],.004,cyan);
+    arms.push({shoulder,elbow,side});
   }
+  // Energy filaments are discrete 3D tubes, not 2D overlays.
+  for(const s of [-1,1]){
+    line(core,[[s*.11,.63,.135],[s*.10,.48,.159],[s*.065,.30,.14],[s*.17,.115,.155]],.004,cyan);
+    line(core,[[s*.1,.66,-.11],[s*.065,.38,-.155],[s*.145,.18,-.21]],.003,violet);
+  }
+  const halo=new THREE.Group();root.add(halo);
+  for(const radius of [.52,.64]){const m=add(new THREE.TorusGeometry(radius,.007,4,96),radius>.60?violet:cyan,halo);m.rotation.x=Math.PI/2;m.position.y=.012}
+  for(let k=0;k<8;k++){const a=k*Math.PI/4;const p=ball(halo,Math.sin(a)*.65,.017,Math.cos(a)*.65,.013,.013,.013,cyan)}
+  const light=new THREE.PointLight(0x8b80fa,1.35,5);light.position.set(0,1.85,.45);root.add(light);
 
-  // Sculpted flowing hairstyle: layered crown locks, small bun, long suspended tendrils.
-  const hairRoot=new THREE.Group();hairRoot.position.set(0,1.92,-.055);root.add(hairRoot);
-  orb(0,.125,-.015,.153,.103,.12,hairmat,hairRoot);
-  // Floating bun and coiled rope geometry.
-  orb(.058,.194,-.074,.095,.094,.098,hairmat,hairRoot);
-  const bunSpiral=[];for(let i=0;i<=42;i++){const a=i/42*Math.PI*4;bunSpiral.push([.058+Math.cos(a)*(.08-i*.0012),.194+Math.sin(a)*(.078-i*.001),-.012]);}
-  tube(bunSpiral,.010,purple,hairRoot,60);
-  // Forehead fringe as individually curved thick locks.
-  for(let i=0;i<10;i++){
-    const x=(i-4.5)*.029;
-    tube([[x,.19,.079],[x+.020,.12,.12],[x+.029,.028,.12],[x+.015,-.040,.12]],.012+i%3*.002,hairmat,hairRoot,22);
+  // Semi-implicit damped springs; stable on slow and fast machines.
+  class Spring{
+    constructor(stiff=62,damp=12){this.x=0;this.v=0;this.stiff=stiff;this.damp=damp}
+    step(target,dt){const t=Math.min(dt,1/30);this.v+=(this.stiff*(target-this.x)-this.damp*this.v)*t;this.x+=this.v*t;return this.x}
   }
-  const strands=[];
-  for(let i=0;i<31;i++){
-    const a=i/31*Math.PI*2,random=Math.sin(i*3.87);
-    const anchor=new THREE.Group();anchor.position.set(Math.sin(a)*.118,.105,Math.cos(a)*.073-.055);
-    hairRoot.add(anchor);
-    const len=.25+(i%7)*.095, out=Math.sin(a)*(.08+.07*Math.abs(random));
-    const endY=-len;
-    const points=[[0,0,0],[out*.36,-len*.24,-.055],[out,-len*.52,-.092],
-      [out*.65,-len*.80,-.055],[out+.024*random,endY,-.08]];
-    tube(points,.009+(i%4)*.0035,hairmat,anchor,25);
-    if(i%2===0)tube(points.map(([x,y,z])=>[x+.011,y,z+.013]),.0035,hairThin,anchor,25);
-    strands.push({group:anchor,i,a});
-  }
-  // A subtle programmable spinal lattice and tracing on the torso.
-  for(const side of [-1,1]){
-    tube([[side*.12,1.6,.126],[side*.14,1.34,.134],[side*.08,1.2,.144],[side*.155,1.025,.16]],.006,cyan);
-    tube([[side*.07,1.63,-.13],[side*.12,1.35,-.17],[side*.145,1.10,-.22]],.004,purple);
-  }
-  for(let i=0;i<25;i++){
-    const y=.92+i*.027, x=Math.sin(i*2.7)*.09;
-    const dot=orb(x,y,.20,.006,.004,.004,i%3===0?purple:cyan);dot.material.transparent=true;
-  }
-  // Luminous platform anchors construct in-world without locking the character in a showcase.
-  const halo = new THREE.Group();halo.position.set(0,.008,0);root.add(halo);
-  for(const r of [.48,.64]){
-    const ring=mesh(new THREE.TorusGeometry(r,.009,4,100),r>.5?purple:cyan,halo);ring.rotation.x=Math.PI/2;
-  }
-  for(let i=0;i<8;i++){
-    const a=i*Math.PI/4;
-    const b=mesh(new THREE.BoxGeometry(.12,.011,.012),cyan,halo);b.position.set(Math.sin(a)*.64,0,Math.cos(a)*.64);b.rotation.y=a;
-  }
-  const accent=new THREE.PointLight(0x6c7fff,2.2,6);accent.position.set(0,1.8,.35);root.add(accent);
-  const floater=new THREE.Group();root.add(floater);
-  const motes=[];
-  for(let i=0;i<40;i++){
-    const a=i*2.39996,r=.22+(i%8)*.052,y=.45+(i*17%41)/41*1.56;
-    const m=mesh(new THREE.SphereGeometry(.008+(i%4)*.004,5,4),i%3?cyan:purple,floater);
-    m.position.set(Math.cos(a)*r,y,Math.sin(a)*r);motes.push({m,phase:i*.71});
-  }
-  // Yuna is always rendered as true 3D geometry. Her approved four-view
-  // artwork remains accessible in the character panel, not projected as a flat
-  // plane in the world. You can freely walk around her from every angle.
-  const displayMode='model';
-  function setDisplayMode(){return 'model';}
-  function rotateBy(angle){root.rotation.y+=Number(angle)||0;faceRotation=root.rotation.y;}
-  function resetFacing(){root.rotation.y=0;faceRotation=0;}
-  let faceRotation=0;
-  let pose='idle',waveUntil=0,lookAt=false,hairFlow=1,visibility=true,lastT=0;
-  function wave(){pose='wave';waveUntil=lastT+2.8;}
-  function setPose(value){pose=value;waveUntil=(value==='wave'||value==='greet')?lastT+2.8:0;}
-  function setHairFlow(v){hairFlow=Number(v);}
-  function setFollow(v){lookAt=false;/* Yuna never auto-tracks the camera. */}
-  function setVisible(v){visibility=Boolean(v);root.visible=visibility;}
+  const springs={bust:new Spring(54,8.5),rear:new Spring(43,7.5),head:new Spring(26,7)};
+  let secondary=1.0,hairFlow=1,walk=true,pose='idle',poseEnd=0,lastTime=0,progress=0,lookAt=false;
+  let prev=V(root.position.x,0,root.position.z),lastSpeed=0,velocity=0;
+  const stops=[[-3.15,12.9],[-1.4,12.3],[-1.3,10.8],[-3.5,10.5],[-4.2,12.0]];
+  let point=0,wait=1.8;
+  function wave(){pose='wave';poseEnd=lastTime+2.6;wait=Math.max(wait,2.6)}
+  function setPose(p){pose=p;poseEnd=lastTime+2.7;if(p!=='idle')wait=Math.max(wait,2.7)}
+  function setHairFlow(v){hairFlow=clamp(Number(v)||0,0,2.5)}
+  function setSecondaryMotion(v){secondary=clamp(Number(v)||0,0,2.5)}
+  function setWander(v){walk=!!v;wait=Math.max(wait,.3)}
+  function resetFacing(){root.rotation.y=0;point=0}
+  function rotateBy(rad){root.rotation.y+=Number(rad)||0;walk=false}
+  function setFollow(){lookAt=false} // never forces Yuna to face the camera
+  function setVisible(v){root.visible=!!v}
+  function setDisplayMode(){return 'model'}
   function update(t,dt,cameraPos){
-    lastT=t;
-    const alive=t*.56;
-    if(pose!=='idle' && t>waveUntil)pose='idle';
-    // IMPORTANT: She remains facing her own direction, independent of where
-    // the player stands. No camera-facing billboards or automatic yaw tracking.
-    // Hover remains extremely subtle so her feet visually touch the floor.
-    const bob=Math.sin(alive*1.7)*.006;
-    const blink=(t%6.3>5.99)?Math.max(.09,Math.abs(t%6.3-6.145)*9):1;
-    for(const eye of head.userData.eyes||[])eye.scale.y=blink;
-    head.rotation.z=Math.sin(alive*.77)*.017;
-    head.rotation.x=Math.sin(alive*.55)*.015;
-    hairRoot.position.y=1.93+bob;
-    hairRoot.rotation.z=Math.sin(t*.46)*.025*hairFlow;
-    hairRoot.rotation.x=Math.sin(t*.39)*.025*hairFlow;
-    for(const x of strands){x.group.rotation.z=Math.sin(t*.66+x.i*.43)*(.05+.02*(x.i%4))*hairFlow;
-      x.group.rotation.x=Math.cos(t*.83+x.i*.57)*(.05+.015*(x.i%3))*hairFlow;}
-    for(const {pivot,side} of arms){
-      pivot.rotation.z=side*(.06+Math.sin(t*.7+side)*.017);
-      pivot.rotation.x=Math.sin(t*.53+side)*.022;
-      if(side===1 && pose==='wave'){
-        pivot.rotation.z=2.2+Math.sin(t*7.5)*.17;
-        pivot.rotation.x=-.3+Math.sin(t*8)*.15;
+    dt=clamp(dt,0,.045);lastTime=t;
+    if(pose!=='idle'&&t>poseEnd)pose='idle';
+    let speed=0;
+    if(walk&&pose==='idle'){
+      if(wait>0)wait-=dt;
+      else {
+        const p=stops[point],dx=p[0]-root.position.x,dz=p[1]-root.position.z,dist=Math.hypot(dx,dz);
+        if(dist<.14){point=(point+1)%stops.length;wait=.35+(point%3)*.65}
+        else {
+          speed=.55;const n=Math.min(dist,speed*dt);
+          root.position.x+=dx/dist*n;root.position.z+=dz/dist*n;
+          const desired=Math.atan2(dx,dz); // character forward axis +Z
+          let delta=Math.atan2(Math.sin(desired-root.rotation.y),Math.cos(desired-root.rotation.y));
+          root.rotation.y+=clamp(delta,-dt*1.5,dt*1.5);
+        }
       }
-      if(pose==='greet'){pivot.rotation.x=-.36;}
     }
-    halo.rotation.y=t*.055;
-    for(const p of motes){p.m.position.y+=(Math.sin(t*.6+p.phase)-Math.sin((t-dt)*.6+p.phase))*.06;}
-    accent.intensity=2.0+Math.sin(t*1.1)*.24;
+    // Gait and body follow movement; not a position-independent stock waving mannequin.
+    const moving=speed>.05;progress+=(moving?speed*11:1.8)*dt;
+    const gait=moving?Math.sin(progress):0;
+    const lean=moving?.035:0;
+    core.rotation.z=Math.sin(progress*.55)*.010+(moving?gait*.008:0);
+    core.rotation.x=lean+Math.sin(t*.9)*.006;
+    core.position.y=.96+(moving?Math.abs(Math.cos(progress))*.013:Math.sin(t*1.15)*.003);
+    head.rotation.z=Math.sin(t*.48)*.022+gait*.008;
+    head.rotation.x=Math.sin(t*.62)*.018;
+    for(const l of legs){
+      l.hip.rotation.x=(moving?Math.sin(progress+l.side*Math.PI/2)*.32:Math.sin(t*.8+l.side)*.007);
+      l.knee.rotation.x=moving?Math.max(0,Math.sin(progress+l.side*Math.PI/2+.4))*.38:.035;
+      l.ankle.rotation.x=-l.hip.rotation.x*.34-l.knee.rotation.x*.40;
+    }
+    for(const a of arms){
+      a.shoulder.rotation.x=moving?-Math.sin(progress+a.side*Math.PI/2)*.27:Math.sin(t*.5+a.side)*.02;
+      a.shoulder.rotation.z=a.side*.045;
+      a.elbow.rotation.x=-.11;
+      if(a.side===1&&pose==='wave'){
+        a.shoulder.rotation.z=-1.6;
+        a.shoulder.rotation.x=-.4;
+        a.elbow.rotation.z=Math.sin(t*8.5)*.25-.30;
+      }else a.elbow.rotation.z=0;
+    }
+    // Separate spring simulation for upper torso and rear tissue. Motion is along Z, *not* a hip width scale.
+    const accel=(speed-lastSpeed)/Math.max(.025,dt);lastSpeed=speed;
+    const f=secondary;
+    const springBust=springs.bust.step((moving?-.011*gait:.0025*Math.sin(t*1.7))+accel*.0025,dt)*f;
+    const springRear=springs.rear.step((moving?.014*Math.sin(progress+.9):.003*Math.sin(t*1.2))+accel*.003,dt)*f;
+    for(const patch of body.patches){
+      const attr=patch.geo.attributes.position,arr=attr.array;
+      for(let i=0;i<patch.bust.length;i++)arr[i*3+2]=patch.rest[i*3+2]+springBust*patch.bust[i]-springRear*patch.rear[i];
+      attr.needsUpdate=true;
+      if(Math.floor(t*30)%3===0)patch.geo.computeVertexNormals();
+    }
+    // Periodic blink; face stays the same identity from the approved character art.
+    const bt=t%5.4;const blinking=bt>5.16&&bt<5.40;
+    for(const lid of eyelids)lid.visible=blinking;
+    hairRoot.rotation.z=Math.sin(t*.51)*.023*hairFlow;
+    hairRoot.rotation.x=Math.sin(t*.36)*.032*hairFlow;
+    // Per-strand damped spring / underwater current animation. Mesh vertices change on each frame.
+    for(const h of hair){
+      const out=h.geo.attributes.position;
+      const {anchor,length,width,phase,points,i}=h;
+      for(let k=0;k<points.length;k++){
+        const q=k/(points.length-1),waveA=Math.sin(t*.93+phase+q*2.1)*(.02+.049*q)*hairFlow;
+        const waveB=Math.cos(t*.62+phase*1.3+q*3.0)*(.017+.032*q)*hairFlow;
+        const p=points[k];
+        const tX=anchor.x+waveA*q+q*q*Math.sin(phase*.2)*.036;
+        const tY=anchor.y-length*q+Math.cos(t*.55+phase+q*4)*.023*q*hairFlow;
+        const tZ=anchor.z+waveB*q-.045*q;
+        const follow=k===0?1:1-Math.exp(-dt*(9-4*q));
+        p.x+=(tX-p.x)*follow;p.y+=(tY-p.y)*follow;p.z+=(tZ-p.z)*follow;
+        const taper=(1-.91*q),w=width*taper;
+        const idx=k*6;out.array[idx]=p.x-w;out.array[idx+1]=p.y;out.array[idx+2]=p.z;
+        out.array[idx+3]=p.x+w;out.array[idx+4]=p.y;out.array[idx+5]=p.z;
+      }
+      out.needsUpdate=true;
+      if(Math.floor(t*24+i)%3===0)h.geo.computeVertexNormals();
+    }
+    halo.rotation.y=t*.1;light.intensity=1.2+.18*Math.sin(t*.8);
+    velocity=speed;
   }
-  return {root,update,wave,setPose,setHairFlow,setFollow,setVisible,
-    setDisplayMode,getDisplayMode:()=>displayMode,rotateBy,resetFacing,
-    getPose:()=>pose,getFollow:()=>false,getHairFlow:()=>hairFlow};
+  function getWander(){return walk}
+  return {root,update,wave,setPose,setHairFlow,setSecondaryMotion,setWander,getWander,
+    setFollow,setVisible,setDisplayMode,getDisplayMode:()=> 'model',rotateBy,resetFacing,
+    getPose:()=>pose,getFollow:()=>false,getHairFlow:()=>hairFlow,getSecondaryMotion:()=>secondary,
+    getStatus:()=>({walk,speed:velocity})};
 }

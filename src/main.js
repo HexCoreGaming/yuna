@@ -24,7 +24,7 @@ const composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scen
 const MAT={stone:new THREE.MeshStandardMaterial({color:0x131620,roughness:.25,metalness:.36}), floor:new THREE.MeshStandardMaterial({color:0x1d2435,roughness:.12,metalness:.42}),ceil:new THREE.MeshStandardMaterial({color:0x10121b,roughness:.37,metalness:.22}),wall:new THREE.MeshStandardMaterial({color:0x171b28,roughness:.39,metalness:.4}),panel:new THREE.MeshStandardMaterial({color:0x252b38,roughness:.3,metalness:.68}),metal:new THREE.MeshStandardMaterial({color:0x30384c,roughness:.24,metalness:.8}),black:new THREE.MeshStandardMaterial({color:0x080b13,metalness:.7,roughness:.19}),glass:new THREE.MeshPhysicalMaterial({color:0x87a2d2,transparent:true,opacity:.18,roughness:.055,metalness:.13,depthWrite:false,side:THREE.DoubleSide}),glassDark:new THREE.MeshPhysicalMaterial({color:0x131b38,transparent:true,opacity:.42,metalness:.52,roughness:.08,depthWrite:false,side:THREE.DoubleSide}),white:new THREE.MeshStandardMaterial({color:0xd8e4f5,roughness:.42,metalness:.12}),fabric:new THREE.MeshStandardMaterial({color:0x454960,roughness:.83}),fabricLight:new THREE.MeshStandardMaterial({color:0x9ca9ba,roughness:.88}),wood:new THREE.MeshStandardMaterial({color:0x29252e,roughness:.51}),water:new THREE.MeshPhysicalMaterial({color:0x285279,metalness:.4,roughness:.045,transparent:true,opacity:.87,clearcoat:1,clearcoatRoughness:.03})};
 let glowMat;
 let yuna=null;
-const collision=[];const interactive=[];const dynamic=[];const rooms=[
+const collision=[];const interactive=[];let yunaInteraction=null;const dynamic=[];const rooms=[
  {name:'CENTRAL ATRIUM',x:0,z:16,desc:'Main arrival gallery'},
  {name:'PANORAMA LOUNGE',x:-12,z:5,desc:'Relax and enjoy the cosmos'},
  {name:'CHEF’S KITCHEN',x:11,z:6,desc:'Kitchen and dining'},
@@ -251,13 +251,19 @@ function events(){
   // reference overlay and never replaces her body with an image plane.
   el('btn-yuna-left').onclick=()=>yuna?.rotateBy(-Math.PI/4);
   el('btn-yuna-right').onclick=()=>yuna?.rotateBy(Math.PI/4);
-  el('btn-yuna-reset-facing').onclick=()=>yuna?.resetFacing();
+  el('btn-yuna-reset-facing').onclick=()=>{yuna?.resetFacing();yuna?.setWander(false);el('btn-yuna-wander').textContent='START WANDERING'};
+  el('btn-yuna-wander').onclick=()=>{const next=!yuna?.getWander();yuna?.setWander(next);el('btn-yuna-wander').textContent=next?'PAUSE WANDERING':'START WANDERING'};
+  el('btn-yuna-stage').onclick=()=>{yuna?.setWander(false);el('btn-yuna-wander').textContent='START WANDERING';
+    const p=yuna?.root.position||new THREE.Vector3(-3.15,0,12.9);
+    controls.clearKeys();camera.position.set(p.x,p.y+1.66,p.z+3.55);controls.setOrientation(0,-.025);
+    closePanels();lock();toast('YUNA / FREE 360° CHARACTER VIEW')};
   el('btn-yuna-wave').onclick=()=>{yuna?.wave();closePanels();lock();toast('YUNA / HELLO')};
   el('btn-yuna-find').onclick=()=>{
-    controls.clearKeys();camera.position.set(-3.2,1.73,16.5);controls.setOrientation(0,-.04);
+    controls.clearKeys();const p=yuna?.root.position||new THREE.Vector3(-3.15,0,12.9);camera.position.set(p.x,1.73,p.z+3.35);controls.setOrientation(0,-.04);
     closePanels();lock();toast('YUNA / ATRIUM');setLocation();
   };
   el('hair-strength').oninput=e=>yuna?.setHairFlow(e.target.value);
+  el('secondary-strength').oninput=e=>yuna?.setSecondaryMotion(e.target.value);
   el('btn-character-reference').onclick=()=>el('character-reference-overlay').classList.remove('hidden');
   el('close-character-reference').onclick=()=>el('character-reference-overlay').classList.add('hidden');
   el('character-reference-overlay').addEventListener('click',e=>{if(e.target.id==='character-reference-overlay')e.currentTarget.classList.add('hidden')});
@@ -292,7 +298,7 @@ function animate(){
   const dt=Math.min(.06,timeClock.getDelta());
   clock+=dt;
   const t=clock;
-  if(yuna)yuna.update(t,dt,camera.position);
+  if(yuna){yuna.update(t,dt,camera.position);if(yunaInteraction){yunaInteraction.pos.x=yuna.root.position.x;yunaInteraction.pos.z=yuna.root.position.z;}}
   for(const d of dynamic){
     if(d.update)d.update(t);
     if(d.mesh){d.angle=THREE.MathUtils.damp(d.angle,d.target,5,dt);d.mesh.rotation.y=d.angle}
@@ -312,5 +318,5 @@ function animate(){
   if(app.bloom)composer.render();else renderer.render(scene,camera);
 }
 const timeClock=new THREE.Clock();
-async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='MATERIALIZING YUNA';bar.style.width='67%';yuna=createYuna(THREE,scene);addInteract('MEET YUNA',-3.15,1.5,12.9,()=>{openPanel('yuna');yuna.setPose('greet')},2.75);status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
+async function init(){try{const status=el('loading-status'),bar=el('load-progress');status.textContent='BUILDING ARCHITECTURE';bar.style.width='21%';cosmicEnvironment();buildShell();status.textContent='FURNISHING INTERIORS';bar.style.width='50%';atrium();lounge();kitchen();bedroom();office();bathroom();deck();residenceDetails();status.textContent='MATERIALIZING YUNA';bar.style.width='67%';yuna=createYuna(THREE,scene);addInteract('MEET YUNA',-3.15,1.5,12.9,()=>{yuna.setWander(false);el('btn-yuna-wander').textContent='START WANDERING';openPanel('yuna');yuna.setPose('greet')},2.75);yunaInteraction=interactive[interactive.length-1];status.textContent='CALIBRATING LIGHTING';bar.style.width='81%';applyMode(app.mode);applyColor(app.accent);events();bar.style.width='100%';status.textContent='ENVIRONMENT READY';setTimeout(()=>document.body.classList.add('loaded'),350);animate()}catch(e){console.error(e);el('loading-status').textContent='STARTUP ERROR: '+e.message}}
 init();
