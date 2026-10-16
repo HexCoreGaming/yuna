@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Yuna Pocket — V1.0.4</title>
+<title>Yuna Pocket — V1.0.5</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif}*{box-sizing:border-box}body{margin:0;background:#070814;color:#e8eaff;overflow:hidden}#stage{position:fixed;inset:0;touch-action:none}#stage canvas{display:block}.chrome{position:fixed;pointer-events:none;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(12px,2.2vw,28px)}.chrome>*{pointer-events:auto}.header,.footer{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:clamp(18px,3vw,32px);font-weight:760;letter-spacing:.22em;background:linear-gradient(100deg,#ad9bff,#79dcff);background-clip:text;color:transparent}.tag{font-size:10px;letter-spacing:.17em;color:#a6b3d6}.panel{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px;border:1px solid #58558670;border-radius:14px;background:#0c1123c9;backdrop-filter:blur(18px);max-width:860px}button,input{accent-color:#a18fff}button{color:#e9eaff;background:#171b34;border:1px solid #66669b;border-radius:8px;padding:9px 13px;cursor:pointer}button:hover,button.active{background:#493887}label{font-size:12px;color:#bfc9e8;display:flex;align-items:center;gap:8px}input[type=range]{width:112px}.footer{align-items:end}#status{font-size:11px;color:#88d7ff}.gate{position:fixed;z-index:10;inset:0;background:#050817f7;display:grid;place-items:center}.gatebox{border:1px solid #7767ae;border-radius:17px;padding:26px;width:min(380px,92vw);background:#0e1327;box-shadow:0 0 70px #5f42b729}.gatebox h1{margin:0 0 8px;font-size:24px}.gatebox p{color:#aab7dd;font-size:12px}.gatebox input{background:#090f20;color:white;padding:13px;border:1px solid #6d6d97;border-radius:8px;width:100%;margin:10px 0}.gatebox button{width:100%}.hidden{display:none!important}@media(max-width:570px){.footer{flex-direction:column;align-items:stretch}.panel{gap:5px;padding:9px}button{padding:8px 10px}label{font-size:11px}}
 </style>
@@ -10,14 +10,14 @@
 </head>
 <body>
 <div id="stage"></div>
-<div class="chrome"><div class="header"><div><div class="brand">YUNA</div><div class="tag">POCKET · V1.0.4 · WEBGL MESH</div></div><div class="tag">HEXCORE · PRIVATE STUDIO</div></div><div class="footer"><div class="panel"><button id="idle" class="active">IDLE</button><button id="dance">DANCE</button><button id="pulse">PULSE</button><button id="auto">AUTO: OFF</button><button id="tilt">ENABLE TILT</button><label>BOUNCE <input id="bounce" type="range" min="0" max="200" value="100"></label><label>ZOOM <input id="zoom" type="range" min="65" max="160" value="100"></label></div><div id="status">LOADING ARTWORK…</div></div></div>
-<div id="gate" class="gate"><form id="gateform" class="gatebox"><div class="brand">YUNA</div><h1>CHARACTER ACCESS</h1><p id="gateLabel">V1.0.4 · CHECKPOINT 01 / 02</p><input id="pass" type="password" placeholder="ACCESS PHRASE" autocomplete="off" required><button>CONTINUE</button><p id="gateError" role="alert"></p></form></div>
+<div class="chrome"><div class="header"><div><div class="brand">YUNA</div><div class="tag">POCKET · V1.0.5 · WEBGL MESH</div></div><div class="tag">HEXCORE · PRIVATE STUDIO</div></div><div class="footer"><div class="panel"><button id="idle" class="active">IDLE</button><button id="dance">DANCE</button><button id="pulse">PULSE</button><button id="auto">AUTO: OFF</button><button id="tilt">ENABLE TILT</button><label>BOUNCE <input id="bounce" type="range" min="0" max="200" value="100"></label><label>ZOOM <input id="zoom" type="range" min="65" max="160" value="100"></label></div><div id="status">LOADING ARTWORK…</div></div></div>
+<div id="gate" class="gate"><form id="gateform" class="gatebox"><div class="brand">YUNA</div><h1>CHARACTER ACCESS</h1><p id="gateLabel">V1.0.5 · CHECKPOINT 01 / 02</p><input id="pass" type="password" placeholder="ACCESS PHRASE" autocomplete="off" required><button>CONTINUE</button><p id="gateError" role="alert"></p></form></div>
 <script>
 'use strict';
 // [001] ACCESS — display-only gate. GitHub Pages files remain publicly retrievable.
 const $=id=>document.getElementById(id);
 let step=0;const secrets=['YUNA-MOUTH','LUNA-BUTT'];
-$('gateform').addEventListener('submit',e=>{e.preventDefault();if($('pass').value!==secrets[step]){$('gateError').textContent='INCORRECT PHRASE';return;}step++;$('pass').value='';$('gateError').textContent='';if(step<2){$('gateLabel').textContent='V1.0.4 · CHECKPOINT 02 / 02';$('pass').focus();}else $('gate').classList.add('hidden');});
+$('gateform').addEventListener('submit',e=>{e.preventDefault();if($('pass').value!==secrets[step]){$('gateError').textContent='INCORRECT PHRASE';return;}step++;$('pass').value='';$('gateError').textContent='';if(step<2){$('gateLabel').textContent='V1.0.5 · CHECKPOINT 02 / 02';$('pass').focus();}else $('gate').classList.add('hidden');});
 // [002] PIXI APP — only the two provided/processed PNG images are character assets.
 const app=new PIXI.Application({resizeTo:window,backgroundColor:0x070814,antialias:true,resolution:Math.min(devicePixelRatio||1,2),autoDensity:true});
 $('stage').appendChild(app.view);
@@ -35,7 +35,7 @@ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
 }
 for(let y=0;y<GRID;y++)for(let x=0;x<GRID;x++){const a=y*COLS+x,b=a+1,c=a+COLS,d=c+1;indices.push(a,c,b,b,c,d);}
 // [003] PHYSICS — spring/mass/damper; each vertex moves independently.
-const config={stiffness:95,damping:5.8,mass:1,amplitude:1};
+const config={stiffness:115,damping:5.4,mass:1,amplitude:1};
 let action='idle',auto=false,clock=0,dragging=false,lastPointer=null,tiltX=0,tiltY=0,lastAuto=0;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function kick(dx,dy,strength=1,x=AREA.x+AREA.w/2,y=AREA.y+AREA.h/2){
@@ -67,10 +67,12 @@ function update(dt){clock+=dt;if(auto&&clock-lastAuto>3.5){lastAuto=clock;action
 function fit(){const w=app.screen.width,h=app.screen.height,scale=Math.min((w*.88)/SIZE.w,(h*.82)/SIZE.h)*Number($('zoom').value)/100;
  scene.scale.set(scale);scene.position.set(w/2-SIZE.w*scale/2,h/2-SIZE.h*scale/2);}
 window.addEventListener('resize',fit);$('zoom').addEventListener('input',fit);
-app.ticker.add(()=>update(Math.min(app.ticker.deltaMS/1000,.033)));
+app.ticker.add(()=>update(Math.min(app.ticker.deltaMS/1000,.025)));
 // [005] POINTER INPUT — tap impulse and drag velocity, mouse and touchscreen.
 function localPosition(e){const box=app.view.getBoundingClientRect();const x=(e.clientX-box.left)*app.screen.width/box.width,y=(e.clientY-box.top)*app.screen.height/box.height;return {x:(x-scene.position.x)/scene.scale.x,y:(y-scene.position.y)/scene.scale.y};}
-app.view.addEventListener('pointerdown',e=>{app.view.setPointerCapture(e.pointerId);dragging=true;lastPointer=localPosition(e);kick(0,60,1.2,lastPointer.x,lastPointer.y);});
+app.view.addEventListener('pointerdown',e=>{app.view.setPointerCapture(e.pointerId);lastPointer=localPosition(e);
+  dragging=(lastPointer.x>=AREA.x-20 && lastPointer.x<=AREA.x+AREA.w+20 && lastPointer.y>=AREA.y-20 && lastPointer.y<=AREA.y+AREA.h+20);
+  if(dragging)kick(0,140,1.7,lastPointer.x,lastPointer.y);});
 app.view.addEventListener('pointermove',e=>{if(!dragging)return;const p=localPosition(e);kick((p.x-lastPointer.x)*3,(p.y-lastPointer.y)*3,.45,p.x,p.y);lastPointer=p;});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.view.addEventListener(event,()=>{dragging=false;lastPointer=null;});
 // [006] MOBILE ORIENTATION — permission must be requested by a user gesture on iOS.
