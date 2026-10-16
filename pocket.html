@@ -11,7 +11,7 @@
 <body>
 <div id="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-mark">Y<span>✦</span></div><div><b>YUNA <em>/</em> POCKET</b><small>PRIVATE CHARACTER STUDIO <span class="version">/ V1.0</span></small></div></div>
+    <div class="brand"><div class="brand-mark">Y<span>✦</span></div><div><b>YUNA <em>/</em> POCKET</b><small>PRIVATE CHARACTER STUDIO <span class="version">/ V1.2</span></small></div></div>
     <div class="top-actions"><span class="local-pill"><i></i> LOCAL SESSION</span><a class="mode-link" href="./index.html"><span class="arrow">↗</span> 3D RESIDENCE</a></div>
   </header>
   <main class="layout">
@@ -41,12 +41,20 @@
      <div class="panel-header"><div class="eyebrow">THE CHARACTER <span>✦</span></div><h2>She’s here.</h2><p>A living hologram, animated from your original design.</p></div>
      <div class="panel-group"><div class="control-title"><span>01</span> EXPRESSION</div><div class="mood-grid" id="moods"><button class="mood selected" data-mood="calm">◌ <span>Calm</span></button><button class="mood" data-mood="happy">✧ <span>Happy</span></button><button class="mood" data-mood="curious">◇ <span>Curious</span></button><button class="mood" data-mood="playful">✳ <span>Playful</span></button></div></div>
      <div class="panel-group"><div class="control-title"><span>02</span> MOTION</div><div class="motion-row"><button id="pose-breathe" class="motion-btn selected" data-action="breathe">Breathe</button><button id="pose-walk" class="motion-btn" data-action="walk">Walk</button><button id="pose-dance" class="motion-btn" data-action="dance">Dance</button><button id="pose-wave" class="motion-btn" data-action="sway">Sway</button></div><label class="slider-label" for="hair-flow">FLOWING HAIR <output id="hair-value">75%</output></label><input id="hair-flow" class="range" type="range" min="0" max="200" value="75"/><label class="slider-label" for="physics">ANIME PHYSICS <output id="physics-value">85%</output></label><input id="physics" class="range" type="range" min="0" max="250" value="85"/><p class="helper">Animation intensity changes movement; it doesn't change her basic proportions.</p></div>
-     <div class="panel-group dialogue-panel"><div class="control-title"><span>03</span> VOICE & REACTION</div><div class="speech-bubble" id="speech-bubble" aria-live="polite">“Welcome. I was hoping you'd stop by.”</div><form id="chat-form"><input type="text" id="chat-input" aria-label="Say something to Yuna" placeholder="Say something to Yuna…" maxlength="160" autocomplete="off" /><button type="submit" aria-label="Send message">➤</button></form><div class="speak-row"><button id="speak-btn" type="button">◉ <span>HEAR HER VOICE</span></button><button id="mute-btn" type="button" aria-label="Toggle voice">VOICE ON</button></div><p class="disclosure">Scripted responses + your browser's speech synthesis. This is not an AI language model or live conversation.</p></div>
+     <div class="panel-group"><div class="control-title"><span>03</span> CHARACTER STUDIO</div>
+ <label class="slider-label" for="stage-mode">STAGE APPEARANCE</label>
+ <select id="stage-mode" class="studio-select"><option value="void">Black void / character only</option><option value="original">Original sci-fi stage</option></select>
+ <div class="motion-row"><button id="auto-toggle" class="motion-btn" type="button">▶ AUTO OFF</button><button id="action-next" class="motion-btn" type="button">NEXT ACTION ↦</button></div>
+ <label class="slider-label" for="auto-seconds">AUTO ACTION INTERVAL <output id="auto-seconds-value">8s</output></label><input id="auto-seconds" class="range" type="range" min="3" max="25" value="8"/>
+ <div class="motion-row"><button id="burst-btn" class="motion-btn" type="button">✦ MOTION PULSE</button><button id="hide-ui" class="motion-btn" type="button">FOCUS VIEW</button></div>
+ <p class="helper">Existing image-based 2.5D art is preserved. Movement pulses are stylized warps, not independent rigged anatomy.</p></div>
+ <div class="panel-group dialogue-panel"><div class="control-title"><span>04</span> VOICE & REACTION</div><div class="speech-bubble" id="speech-bubble" aria-live="polite">“Welcome. I was hoping you'd stop by.”</div><form id="chat-form"><input type="text" id="chat-input" aria-label="Say something to Yuna" placeholder="Say something to Yuna…" maxlength="160" autocomplete="off" /><button type="submit" aria-label="Send message">➤</button></form><div class="speak-row"><button id="speak-btn" type="button">◉ <span>HEAR HER VOICE</span></button><button id="mute-btn" type="button" aria-label="Toggle voice">VOICE ON</button></div><p class="disclosure">Scripted responses + your browser's speech synthesis. This is not an AI language model or live conversation.</p></div>
      <footer class="panel-footer"><span>YUNA / PERSONAL SIMULATION</span><div><button id="pause-btn" title="Pause animation">Ⅱ PAUSE</button><button id="reset-btn" title="Reset Yuna">↺ RESET</button></div></footer>
    </aside>
   </main>
   <footer class="bottomline"><span>✦ YUNA POCKET</span><span>YOUR WORLD. YOUR PACE.</span><span>ARTWORK-BASED 2.5D STUDIO · NO ACCOUNT</span></footer>
 </div>
 <script type="module" src="./pocket/pocket.js"></script>
+<script src="./access-gate.js" defer></script>
 </body>
 </html>

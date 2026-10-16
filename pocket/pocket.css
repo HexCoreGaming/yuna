@@ -9,3 +9,15 @@
 @media(max-width:920px){.layout{grid-template-columns:minmax(0,1fr) 280px;display:grid}.rail{grid-column:1 / -1;order:2;display:block;border-right:0;border-bottom:1px solid #32334d;padding:12px}.rail-top,.rail-foot{display:none}.scene-list{display:flex;flex-direction:row;overflow-x:auto;margin:0;gap:7px}.scene-card{flex:0 0 175px;min-height:59px}.theater{min-height:650px}.control-panel{max-height:none;min-height:650px}.bottomline{font-size:8px}}
 @media(max-width:700px){.topbar{height:65px;flex-basis:65px;padding:0 15px}.brand{gap:8px}.brand-mark{font-size:29px}.brand b{font-size:12px}.brand small{font-size:7px}.top-actions{gap:8px}.local-pill{display:none}.mode-link{padding:8px;font-size:9px}.layout{display:flex;flex-direction:column;min-height:0}.theater{height:min(80svh,740px);min-height:530px;flex-shrink:0;order:0}.stage-topleft{top:16px;left:15px}.stage-topleft h1{font-size:25px}.stage-topleft p{font-size:9px}.stage-topright{top:17px;right:14px;font-size:7px}.stage-tip{bottom:16px;left:15px;font-size:8px}.view-controls{bottom:52px}.rail{order:1}.control-panel{order:2;min-height:0;max-height:none;padding:18px}.panel-header{padding-bottom:15px}.panel-header h2{font-size:24px}.panel-group{padding:16px 1px}.bottomline{display:none}}
 @media(prefers-reduced-motion:reduce){.cosmos{animation:none}*{scroll-behavior:auto!important}}
+
+/* [SECTION 013] MINIMAL CHARACTER STUDIO / DARK VOID */
+.studio-select{width:100%;color:#e6e2ff;background:#101324;border:1px solid #55517b;border-radius:8px;padding:10px;margin:6px 0 12px;font:inherit}
+.void-stage{background:radial-gradient(ellipse at 50% 45%,#15142a 0%,#07080c 49%,#020204 85%)!important}
+.void-stage .cosmos,.void-stage .architectural,.void-stage .backwall,.void-stage .light-ring,.void-stage .stage-grid,.void-stage .horizon-line,.void-stage .stage-pedestal,.void-stage .stage-shadow{display:none!important}
+.focus-view .rail,.focus-view .control-panel,.focus-view .bottomline,.focus-view .topbar{display:none!important}
+.focus-view .layout{display:block!important;height:100dvh!important;min-height:100dvh!important}
+.focus-view .theater{width:100%!important;height:100dvh!important;min-height:100dvh!important}
+.focus-view .stage-topleft,.focus-view .stage-tip{display:none!important}
+@media (max-width:700px){.studio-select{font-size:16px}}
+
+.focus-view #hide-ui{display:block!important;position:fixed;right:20px;bottom:20px;z-index:2000;background:#17122b;color:white;padding:12px;border:1px solid #8a65cf;border-radius:10px}

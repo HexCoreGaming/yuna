@@ -18,11 +18,32 @@ const state = {
   speaking:false, speechUntil:0, voice:true, paused:false,
   turnTime:0, gestureUntil:0, gaze:{x:0,y:0}, pointer:{x:0,y:0},
   tinyWave:0, blinkTimer:3.1, blink:0, speakEnvelope:0,
+  auto:false, autoSeconds:8, nextAuto:0, stageMode:'void', focus:false,
   walkTravel:0, interactionCount:0, screen:{w:900,h:800,dpr:1,scale:1,baseX:0,topY:0,drawW:0,drawH:0}
 };
 const rig = {chest: new Spring(15,.78),rear: new Spring(12,.78),hip: new Spring(10,.78),head: new Spring(9,.85),hair: new Spring(7,.87),gesture: new Spring(10,.79)};
 let activeSpeech = null, toastHandle = 0;
 let lastTick = 0;
+// [SECTION 011] AUTONOMOUS ACTION PLAYER — manual and optional automatic sequences
+const AUTO_ACTIONS = ['breathe','sway','walk','dance','sway','breathe'];
+let autoIndex = 0;
+function runNextAction(){
+  const action=AUTO_ACTIONS[autoIndex++ % AUTO_ACTIONS.length];
+  setMotion(action);
+  state.nextAuto=state.time+state.autoSeconds;
+  return action;
+}
+function updateAutoControls(){
+  $('auto-toggle').textContent=state.auto?'Ⅱ AUTO ON':'▶ AUTO OFF';
+  $('auto-toggle').classList.toggle('selected',state.auto);
+}
+function setStage(mode){
+  state.stageMode=mode==='original'?'original':'void';
+  theater.classList.toggle('void-stage',state.stageMode==='void');
+  $('stage-mode').value=state.stageMode;
+  try{localStorage.setItem('yuna.stage',state.stageMode)}catch{}
+}
+
 
 function toast(s) {
   const el = $('stage-toast');el.textContent = s; el.classList.add('visible');
@@ -250,6 +271,7 @@ function animate(now){
   if(document.hidden || state.paused) {render(state.time);return;}
   state.time+=dt;
   const t=state.time;
+  if(state.auto && t>=state.nextAuto)runNextAction();
   const moving=state.motion==='walk'||state.motion==='dance';
   const mult=state.motion==='dance'?1.75:state.motion==='walk'?1.1:0;
   state.motionPhase+=dt*(moving?state.motion==='dance'?5:4.4:1.1);
@@ -283,6 +305,7 @@ function interactCanvas(ev){
   else {rig.hip.kick(1.2);rig.hair.kick(.9);toast('YUNA / NOTICED YOU');}
 }
 function reset(){
+  state.auto=false;state.nextAuto=0;updateAutoControls();
   state.mood='calm';state.motion='breathe';state.yaw=0;state.targetYaw=0;state.physics=.85;state.hair=.75;state.paused=false;
   $('hair-flow').value=75;$('physics').value=85;$('hair-value').value='75%';$('physics-value').value='85%';
   $('pause-btn').textContent='Ⅱ PAUSE';for(const item of Object.values(rig))item.reset();
@@ -290,6 +313,33 @@ function reset(){
 }
 function wire(){
   buildScenes();
+  // [SECTION 012] STUDIO CONTROLS AND VIEW PREFERENCES
+  let preferredStage='void';
+  try{preferredStage=localStorage.getItem('yuna.stage')||'void'}catch{}
+  setStage(preferredStage);
+  $('stage-mode').addEventListener('change',ev=>setStage(ev.target.value));
+  $('auto-toggle').addEventListener('click',()=>{
+    state.auto=!state.auto;
+    state.nextAuto=state.time+state.autoSeconds;
+    updateAutoControls();
+    toast(state.auto?'AUTONOMOUS MOTION ENABLED':'MANUAL MODE');
+  });
+  $('action-next').addEventListener('click',()=>{toast('ACTION / '+runNextAction().toUpperCase())});
+  $('auto-seconds').addEventListener('input',ev=>{
+    state.autoSeconds=Number(ev.target.value);
+    $('auto-seconds-value').textContent=state.autoSeconds+'s';
+    state.nextAuto=state.time+state.autoSeconds;
+  });
+  $('burst-btn').addEventListener('click',()=>{
+    rig.chest.kick(2.1*state.physics);rig.rear.kick(2.2*state.physics);
+    rig.hip.kick(1.4*state.physics);rig.hair.kick(1.5*state.hair);
+    toast('MOTION PULSE / 2.5D');
+  });
+  $('hide-ui').addEventListener('click',()=>{
+    state.focus=!state.focus;document.body.classList.toggle('focus-view',state.focus);
+    $('hide-ui').textContent=state.focus?'EXIT FOCUS':'FOCUS VIEW';
+  });
+  updateAutoControls();
   document.querySelectorAll('[data-mood]').forEach(el=>el.addEventListener('click',()=>setMood(el.dataset.mood)));
   document.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>setMotion(el.dataset.action)));
   $('rotate-left').addEventListener('click',()=>rotateBy(-1));$('rotate-right').addEventListener('click',()=>rotateBy(1));
@@ -325,6 +375,7 @@ function wire(){
   });
   document.addEventListener('keydown',ev=>{
     if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;
+    if(ev.key==='Escape' && state.focus){state.focus=false;document.body.classList.remove('focus-view');$('hide-ui').textContent='FOCUS VIEW';return}
     if(ev.key==='ArrowLeft'){ev.preventDefault();rotateBy(-1)}
     if(ev.key==='ArrowRight'){ev.preventDefault();rotateBy(1)}
     if(ev.code==='Space'){ev.preventDefault();state.paused=!state.paused;$('pause-btn').textContent=state.paused?'▶ RESUME':'Ⅱ PAUSE'}
