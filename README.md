@@ -1,25 +1,26 @@
-# Yuna Pocket V1.4 — Living Character Foundation
+# Yuna — New Foundation V2.0
 
-Pocket-only full replacement project. No 3D residence. Place the entire extracted contents in your GitHub Pages repository root.
+## What this is
+This website is written completely from scratch; no prior ZIP code, graphics, or prototype was reused. It is a brand-new minimal character lab. It uses a **new SVG vector character made from separate illustrated paths**, independently controlled through a JavaScript rig (head, arms, legs, torso, hair, face). This is *not* the previous flat-image wobbling prototype.
 
-## Visual entry phrases
-First: `YUNA-MOUTH`  /  Second: `LUNA-BUTT`
-These are **client-side navigation gates**, not real protection of public files.
+**Visual limitation:** This is a functional stylized vector puppet, **not** professionally drawn Testament of Sister New Devil quality anime art, and **not** a Live2D-quality deformable mesh. It is intended as a transparent first technical foundation while professional layered artwork and rigging remain necessary. It does **not** include explicit sexual animations.
 
-## Changes from V1.3
-- Separate Stretch, Giggle, Nod, and Look actions built upon the existing layered art renderer
-- On-canvas dragging produces regional spring reactions (hair, torso, hip)
-- Cursor-following head drift and light eye gleam when curious/playful
-- Character zoom 65%–145%
-- Automatic action cycle now uses 8 distinct actions and varies mood periodically
-- Dedicated giggle-with-voice button; expressive secondary motion blended into actions
-- Existing dark stage, four-angle turn, scene library, voice, gates, settings and controls maintained
+## Running
+Open `index.html` in a browser or upload all three files to a static web host. Nothing needs installing and no online CDN is required.
 
-## IMPORTANT LIMITATIONS
-This still uses the original flattened directional images and overlay hair cuts. **It is not a professional Live2D rig**. Facial details and body areas are not fully separated, so stretching/warp effects will not behave like true independently articulated anatomy. Camera rotation is cross-fading between four images. There are no explicit animations or new nude assets. Future professional quality requires properly layered redraws, masks, pivots, and art-directed deformations.
+## Demo access phrases
+Step 1: `YUNA-MOUTH`  
+Step 2: `LUNA-BUTT`
 
-## Numbered landmarks
-`pocket/pocket.js` [SECTION 013] motions, [SECTION 014] face overlay, [SECTION 015] drag/zoom. `pocket/pocket.css` [SECTION 016] controls. Existing [SECTION 011] auto player and [SECTION 012] stage controls preserved.
+These checks run entirely in browser JavaScript and **do not protect public static files**.
 
-## Local run
-Open `run-local.bat` on Windows if Python is installed, or serve with `python -m http.server 8000` and visit localhost:8000. For tests install Node and use `npm test`.
+## Architecture
+- `index.html` — fresh dark interface and inline SVG character art (articulated parts have separate group IDs).
+- `styles.css` — neo-futuristic minimalist layout and responsive controls.
+- `app.js` — numbered sections 001–005: access, state, animation, pointer interaction, settings.
+
+## Tested
+JavaScript syntax and file integrity can be checked locally. Visual appearance still needs browser review. Physics is algorithmic animation, not physical collision or anatomically accurate soft-body deformation.
+
+## Next required step to achieve approved anime quality
+Create genuinely high-quality, separately layered artwork with deformable meshes / skeletal pivots and fit it to this controller. Do not market this vector character as final.
