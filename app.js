@@ -1,6 +1,6 @@
 'use strict';
 // [SECTION 001] BUILD VERSION AND TWO ENTRY CHECKS (CLIENT SIDE ONLY)
-const VERSION='V1.0.1';const PASSWORDS=['YUNA-MOUTH','LUNA-BUTT'];let gateStep=0;
+const VERSION='V1.0.2';const PASSWORDS=['YUNA-MOUTH','LUNA-BUTT'];let gateStep=0;
 const $=s=>document.querySelector(s);const $$=s=>Array.from(document.querySelectorAll(s));
 $('#gateForm').addEventListener('submit',e=>{e.preventDefault();if($('#password').value!==PASSWORDS[gateStep]){$('#err').textContent='ACCESS PHRASE NOT RECOGNIZED';return;}if(gateStep===0){gateStep=1;$('#gateNum').textContent='ACCESS CHECKPOINT 02 / 02';$('#password').value='';$('#err').textContent='';$('#password').focus();return;}$('#gate').hidden=true;$('#app').hidden=false;resize();});
 $('#lock').onclick=()=>{gateStep=0;$('#gateNum').textContent='ACCESS CHECKPOINT 01 / 02';$('#password').value='';$('#app').hidden=true;$('#gate').hidden=false;};
