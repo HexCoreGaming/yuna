@@ -1,39 +1,9 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070913"><title>YUNA POCKET · V1.1.1</title><link rel="stylesheet" href="styles.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.3/pixi.min.js"></script></head><body>
-<div id="viewport" aria-label="Interactive animated Yuna"></div><div class="screen-fx" aria-hidden="true"></div>
-<header class="top"><div class="identity"><span class="sigil">Y</span><div><strong>YUNA <em>POCKET</em></strong><small>HEXCORE / CHARACTER SYSTEMS</small></div></div><div class="version">BUILD V1.1.1 <span id="engineLabel">ENGINE INITIALIZING</span></div></header>
-<aside class="sidebar"><div class="eyebrow">CHARACTER DIRECTOR</div><h2>Motion studio</h2><p class="hint">Articulated painted layers · live motion systems</p><div class="group"><label class="groupname">PERFORM</label><div class="buttons"><button data-action="idle" class="selected">Idle</button><button data-action="wave">Wave</button><button data-action="dance">Dance</button><button data-action="stretch">Stretch</button><button data-action="laugh">Laugh</button><button data-action="pose">Pose</button></div></div><div class="group"><label class="groupname">LIVING CHARACTER</label><div class="buttons"><button id="autoplay">Auto <b>OFF</b></button><button id="tapPulse">Motion pulse</button><button id="tilt">Phone tilt</button></div></div><div class="group"><label class="groupname" for="physics">SECONDARY MOTION <output id="physicsOut">100%</output></label><input id="physics" type="range" min="0" max="200" value="100"><label class="groupname" for="speed">ANIMATION SPEED <output id="speedOut">100%</output></label><input id="speed" type="range" min="30" max="180" value="100"><label class="groupname" for="zoom">CHARACTER ZOOM <output id="zoomOut">100%</output></label><input id="zoom" type="range" min="65" max="155" value="100"></div><div class="group"><div class="groupname">MOOD</div><div class="buttons"><button data-mood="calm" class="selected">Calm</button><button data-mood="happy">Happy</button><button data-mood="mischievous">Playful</button></div></div><div class="group"><div class="groupname">ENGINE STATUS</div><div class="status" id="status">Loading painted layers…</div></div></aside>
-<div class="stage-caption"><span class="state-led"></span> <span id="actionCaption">STANDBY / IDLE</span><span class="divider">/</span><span id="moodCaption">CALM</span></div><footer>POINTER DRAG · TAP REACTION · WEBGL SPRING MESH <span>V1.1.1 — CHARACTER-FIRST BUILD</span></footer>
-<div id="gate" class="gate"><div class="gate-card"><span class="eyebrow">HEXCORE PRIVATE STUDIO</span><h1>YUNA <i>POCKET</i></h1><div class="versionline">V1.1.1 · <span id="gateStep">ACCESS STAGE 01 / 02</span></div><form id="gateForm"><label for="gateInput">ACCESS PHRASE</label><input id="gateInput" type="password" required autocomplete="off" placeholder="ENTER PHRASE"><button type="submit">CONTINUE <span>→</span></button></form><p id="gateError" role="alert"></p><p class="fine">Visual access gate only — not server-side protection.</p></div></div>
-<script>
-// [010] ACCESS GATE — independent of PixiJS, module imports, and asset loading.
-// This display-only gate is not server-side authentication.
-(() => {
-  const form = document.getElementById('gateForm');
-  const input = document.getElementById('gateInput');
-  const error = document.getElementById('gateError');
-  const stage = document.getElementById('gateStep');
-  const gate = document.getElementById('gate');
-  const phrases = ['YUNA-MOUTH','LUNA-BUTT'];
-  let current = 0;
-  form.addEventListener('submit', event => {
-    event.preventDefault();
-    const entered = input.value.trim();
-    if (entered !== phrases[current]) {
-      error.textContent = 'INCORRECT ACCESS PHRASE';
-      input.select();
-      return;
-    }
-    current++;
-    input.value = '';
-    error.textContent = '';
-    if (current === phrases.length) {
-      gate.classList.add('hidden');
-    } else {
-      stage.textContent = 'ACCESS STAGE 02 / 02';
-      input.focus();
-    }
-  });
-  input.focus();
-})();
-</script>
-<script type="module" src="main.js?v=1.1.1"></script></body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Yuna Engine Core V1.2.0</title><style>
+:root{color-scheme:dark;font-family:system-ui,Segoe UI,sans-serif;background:#070914;color:#e9e8ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 40% 38%,#25204d66,transparent 53%),#070914}.top{border-bottom:1px solid #3b3761;padding:18px 4vw;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:780;letter-spacing:.21em;font-size:21px}.brand em{color:#b7a4ff;font-style:normal}.meta{font-size:11px;letter-spacing:.1em;color:#8ee2f9}.shell{padding:28px 4vw;display:grid;grid-template-columns:270px minmax(0,1fr);gap:18px;max-width:1300px;margin:auto}.panel{border:1px solid #54517c7a;background:#101426cc;border-radius:14px;padding:21px}.panel h2{margin:0 0 10px;font-size:18px}.panel h3{color:#bdb3fd;letter-spacing:.12em;font-size:11px;margin:0 0 18px}.small{font-size:12px;color:#a8afd0;line-height:1.6}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.metric{padding:15px;border:1px solid #313756;border-radius:10px;background:#0a1023}.metric strong{display:block;margin:6px 0}.ok{color:#78e6c2}.fail{color:#ff9d9d}button{border:1px solid #7b6ec0;border-radius:8px;background:#2b2451;color:#f6f3ff;padding:10px 14px;cursor:pointer}button:hover{background:#44367c}input{padding:12px;border:1px solid #746ca5;border-radius:8px;background:#0a1022;color:#fff;width:100%}.gate{position:fixed;inset:0;background:#050715f7;z-index:99;display:grid;place-items:center}.gate.hidden{display:none}.gatebox{width:min(380px,94vw);border:1px solid #786bc5;background:#101426;padding:28px;border-radius:16px;box-shadow:0 0 80px #5641ae44}.gatebox h1{margin:8px 0}.gatebox button{margin-top:12px;width:100%}.gatebox .error{min-height:20px;color:#ff9b9b;font-size:12px}.controls{display:grid;gap:10px;margin-top:20px}.scene{min-height:350px;border:1px solid #353356;background:radial-gradient(ellipse at center,#201a3d,#090b18 70%);border-radius:12px;display:grid;place-content:center;text-align:center;padding:20px;touch-action:none}.scene strong{font-size:20px;letter-spacing:.1em}.scene p{max-width:500px;color:#a1abc9;line-height:1.7;font-size:13px}.pulse{height:10px;background:#7959d6;border-radius:10px;width:80px;margin:20px auto 0;transition:width .15s}.logs{font-family:ui-monospace,monospace;font-size:11px;white-space:pre-wrap;color:#8f9bbb;max-height:140px;overflow:auto}@media(max-width:750px){.shell{grid-template-columns:1fr;padding:15px}.top{flex-wrap:wrap}}
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.3/pixi.min.js"></script></head><body>
+<div class="gate" id="gate"><form class="gatebox" id="gateForm"><div class="meta">HEXCORE GAMING · YUNA POCKET</div><h1>ENGINE ACCESS</h1><p class="small" id="gateStage">V1.2.0 · STAGE 01 / 02</p><input type="password" id="password" placeholder="ACCESS PHRASE" required autocomplete="off"><button type="submit">CONTINUE</button><p class="error" id="gateError"></p><p class="small">Display-only access gate; not server authentication.</p></form></div>
+<header class="top"><div class="brand">YUNA <em>ENGINE CORE</em></div><div class="meta">BUILD V1.2.0 · ENGINE-ONLY MILESTONE</div></header>
+<div class="shell"><aside class="panel"><h2>Engine control</h2><p class="small">This release deliberately does not show a Yuna image or substitute model. It verifies systems before character production.</p><div class="controls"><button id="diagnose">RUN ENGINE TESTS</button><button id="pause">PAUSE SIMULATION</button><button id="impulse">TEST PHYSICS IMPULSE</button><button id="auto">AUTONOMY OFF</button><button id="tilt">ENABLE PHONE TILT</button><label class="small">Spring intensity <input type="range" id="intensity" min="0" max="200" value="100"></label></div><p class="small" id="mode">Initializing...</p></aside><main class="panel"><h3>ENGINE FOUNDATION / REAL STATUS</h3><div class="metrics" id="metrics"></div><div class="scene" id="inputArea"><strong>ENGINE DIAGNOSTIC STAGE</strong><p>Tap or drag here to test the spring mesh input and simulation. No character graphics are being substituted for missing professional artwork.</p><div class="pulse" id="pulseBar"></div></div><h3 style="margin-top:20px">Diagnostic log</h3><pre class="logs" id="log"></pre></main></div>
+<script>// [000] Standalone access — independent of loading engine modules.
+(()=>{const $=x=>document.getElementById(x),secrets=['YUNA-MOUTH','LUNA-BUTT'];let step=0;$('gateForm').addEventListener('submit',e=>{e.preventDefault();if($('password').value.trim()!==secrets[step]){$('gateError').textContent='INCORRECT ACCESS PHRASE';return}step++;$('password').value='';$('gateError').textContent='';if(step===2)$('gate').classList.add('hidden');else{$('gateStage').textContent='V1.2.0 · STAGE 02 / 02';$('password').focus()}})})();</script>
+<script type="module" src="main.js?v=1.2.0"></script></body></html>

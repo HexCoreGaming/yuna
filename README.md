@@ -1,27 +1,26 @@
-# Yuna Pocket V1.1.1 — modular character-engine foundation
+# Yuna Pocket — Engine Core V1.2.0
 
-Open `index.html` through GitHub Pages or a local HTTP server; PixiJS v7 loads from a CDN. Opening from `file://` may block module/image loading. Front end only; no account, external AI, or secure authentication.
+This is an ENGINE-ONLY milestone. It contains no reused character images, no placeholder anatomical drawings, and no room. It is intentionally not the completed animated character. The panel reports missing character artwork and rig openly.
 
-## What is genuinely implemented
-- PixiJS WebGL renderer and eleven separate existing painted animation layers.
-- Joint-pivot transformations for head, torso, pelvis, legs, and both arms.
-- Two independently deformable WebGL meshes; damped spring vertices and pointer impulses.
-- Fixed-step simulation scheduler, parameter animation blends, named actions.
-- Autonomous action scheduling and manual intervention.
-- Pointer/touch input, optional device orientation, and saved user preferences.
-- Two screen passphrase flow, neo-futuristic UI, V1.1.1 first screen.
+## Included systems
 
-## Actual limitations
-- This is **not a Live2D Cubism export** or hand-authored professional deformer rig. It uses source 321x883 painted layers, so hands do not grip objects, mouth is not independently drawn, there are no expression textures, and articulation/occlusion is still limited.
-- No room, Luna, external AI, sound, or new professional character art is included.
-- Display-only password checks are not access control on GitHub Pages.
-- CDN library required. The renderer must be checked visually on the intended device; code checks alone are not visual QA.
+1. Fixed timestep/event bus (`engine/core.js`)
+2. Stable spring/triangle mesh physics (`engine/physics.js`)
+3. Character rig parameter interface (`engine/rig.js`)
+4. Keyframe playback and crossfade (`engine/animation.js`)
+5. Strict asset manifest/loader (`engine/assets.js`)
+6. Autonomous behavior state machine (`engine/behavior.js`)
+7. Multi-character/prop scene registry (`engine/scenes.js`)
+8. Local preferences (`engine/storage.js`)
+9. Pointer and optional phone tilt (`engine/interaction.js`)
+10. PixiJS renderer adapter (`engine/render.js`)
+11. Diagnostics (`engine/diagnostics.js`)
+12. Integration/controller (`main.js`)
 
-## Numbered source sections
-001 core, 002 physics, 003 animation, 004 autonomy, 005 asset manifest, 006 renderer, 007 interaction, 008 storage, 009–012 application.
+## Running
 
-### Next character-production requirement
-Create production anime artwork with separate face features, hair locks, ears/tail, hands, upper/lower limbs and hidden overlap painting; author deformation meshes and expressions in Live2D Cubism or equivalent compatible format; integrate the actual exported runtime. These steps cannot be supplied by creating primitive SVG figures.
+Upload all files to GitHub Pages preserving folders, or run via a local web server (for example `python -m http.server 8000`). First access phrase: `YUNA-MOUTH`. Second: `LUNA-BUTT`. These are display gates, not real security. PixiJS uses a public CDN and requires network access. Select RUN ENGINE TESTS to see system readiness. Press Test Physics Impulse or drag on the stage. Run `npm test` for engine logic tests.
 
+## Not included or complete
 
-V1.1.1 LOGIN FIX: Login submission moved to inline script independent of external PixiJS CDN, module imports, and character assets. Correct phrases: YUNA-MOUTH then LUNA-BUTT.
+Actual Live2D/Cubism runtime integration, production layered art and parameter authoring, performance-tested browser visuals, professional animation sequences, facial morph artwork, or animated character model. The built-in PixiJS renderer adapter is ready for mesh textures but the character is deliberately not faked with placeholder artwork.

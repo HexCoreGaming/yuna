@@ -1,17 +1,9 @@
-// [003] Independent animation engine: named parameter tracks, crossfades, procedural key poses.
-import {smooth} from './core.js';
-const P=(head=0,body=0,leftArm=0,rightArm=0,hips=0,leftLeg=0,rightLeg=0)=>({head,body,leftArm,rightArm,hips,leftLeg,rightLeg});
-export class AnimationDirector{
- constructor(){this.name='idle';this.time=0;this.blend=0;this.from=P();this.current=P();this.speed=1;this.mood='calm'}
- select(name){if(!['idle','wave','dance','stretch','laugh','pose'].includes(name))return;this.from={...this.current};this.name=name;this.time=0;this.blend=0}
- setMood(mood){this.mood=mood}
- update(dt){this.time+=dt*this.speed;this.blend=Math.min(1,this.blend+dt*3.8);const t=this.time,w=Math.sin(t*2.1),breath=Math.sin(t*2.35)*.013;let to=P(Math.sin(t*.72)*.017,breath,Math.sin(t*1.13)*.025,Math.sin(t*1.1+2)*.025,Math.sin(t*.93)*.012,0,0);
- if(this.name==='wave'){to={...to,head:-.065,rightArm:-.75+Math.sin(t*8)*.14,leftArm:.04,body:breath+.02}}
- if(this.name==='dance'){to=P(Math.sin(t*4)*.10,Math.sin(t*4+.2)*.07,Math.sin(t*5)*.32,Math.sin(t*5+2.1)*.3,Math.sin(t*4)*.15,Math.sin(t*4)*.09,-Math.sin(t*4)*.09)}
- if(this.name==='stretch'){to=P(-.08,Math.sin(t*1.2)*.045,-.68,-.68,0,-.025,.025)}
- if(this.name==='laugh'){to=P(Math.sin(t*9)*.055,.04+Math.sin(t*9)*.032,.09,-.14,Math.sin(t*6)*.025,0,0)}
- if(this.name==='pose'){to=P(.075,.012,.13,-.34,-.08,-.04,.04)}
- if(this.mood==='happy')to.head+=.035;if(this.mood==='mischievous')to.head-=.045;
- for(const key in to)this.current[key]=smooth(this.current[key],this.from[key]*(1-this.blend)+to[key]*this.blend,13,dt);
- return this.current}
+// [004] parameter-keyframe animation with crossfade, looping, interpolation
+import {clamp,mix} from './core.js';
+export class AnimationEngine {
+ constructor(rig){this.rig=rig;this.clips=new Map();this.current=null;this.previous=null;this.elapsed=0;this.fade=0;this.fadeDuration=.25;this.speed=1;this.onComplete=null}
+ add(name,{duration=1,loop=true,tracks={}}={}){if(duration<=0)throw Error('Clip duration must be positive');this.clips.set(name,{duration,loop,tracks});return this}
+ play(name,fade=.25){if(!this.clips.has(name))throw Error(`Missing clip: ${name}`);this.previous=this.rig.snapshot();this.current=name;this.elapsed=0;this.fade=0;this.fadeDuration=Math.max(0,fade)}
+ update(dt){if(!this.current)return;const c=this.clips.get(this.current);this.elapsed+=dt*this.speed;const t=c.loop?this.elapsed%c.duration:Math.min(this.elapsed,c.duration);const pose={};for(const [param,keys] of Object.entries(c.tracks)){if(!keys.length)continue;let a=keys[0],b=keys[keys.length-1];for(let k=1;k<keys.length;k++){if(t<=keys[k][0]){b=keys[k];a=keys[k-1];break}}const f=a===b?0:clamp((t-a[0])/(b[0]-a[0]),0,1);pose[param]=mix(a[1],b[1],f)}this.fade=this.fadeDuration?Math.min(1,this.fade+dt/this.fadeDuration):1;for(const [key,v] of Object.entries(pose))this.rig.set(key,mix(this.previous?.[key]??0,v,this.fade));if(!c.loop&&this.elapsed>=c.duration&&this.onComplete){const fn=this.onComplete;this.onComplete=null;fn(this.current)}}
 }
+export function installTestClips(anim){anim.add('idle',{duration:3,tracks:{breath:[[0,0],[.75,.6],[1.5,0],[2.25,-.4],[3,0]],eyeBlink:[[0,0],[1.28,0],[1.35,1],[1.43,0],[3,0]]}});anim.add('look',{duration:2,tracks:{headTurn:[[0,0],[.5,.5],[1.5,-.4],[2,0]],eyeLookX:[[0,0],[.5,.65],[1.5,-.5],[2,0]]}});anim.add('wave',{duration:1.8,tracks:{armRight:[[0,0],[.4,.8],[.65,.5],[.9,.9],[1.3,.5],[1.8,0]],headTilt:[[0,0],[.6,.3],[1.8,0]]}});anim.play('idle')}

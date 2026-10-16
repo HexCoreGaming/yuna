@@ -1,2 +1,5 @@
-// [004] Autonomous behavior state selector, non-repeating action scheduler.
-export class BehaviorDirector{constructor(){this.enabled=false;this.next=0;this.last='idle';this.actions=['wave','dance','stretch','laugh','pose','idle']}update(time,animation){if(!this.enabled||time<this.next)return;let next;do{next=this.actions[Math.floor(Math.random()*this.actions.length)]}while(next===this.last);this.last=next;animation.select(next);this.next=time+2.8+Math.random()*3.8;return next}toggle(time){this.enabled=!this.enabled;this.next=time+1;return this.enabled}}
+// [006] autonomous bounded state machine; only valid registered actions
+export class BehaviorEngine{
+ constructor(){this.enabled=false;this.elapsed=0;this.interval=5;this.actions=['idle','look','wave'];this.next=null}
+ update(dt,valid){if(!this.enabled)return null;this.elapsed+=dt;if(this.elapsed<this.interval)return null;this.elapsed=0;const possible=this.actions.filter(a=>valid.has(a));return possible.length?possible[Math.floor(Math.random()*possible.length)]:null}
+}

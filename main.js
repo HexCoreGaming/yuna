@@ -1,23 +1,26 @@
-// [009] Application composition / dependency injection. One entry point; independent engines.
-import {Clock} from './engine/core.js';
-import {AnimationDirector} from './engine/animation.js';
-import {BehaviorDirector} from './engine/behavior.js';
-import {CharacterRenderer} from './engine/render.js';
-import {bindInteractions} from './engine/interaction.js';
-import {loadSettings,saveSettings} from './engine/save.js';
-const $=id=>document.getElementById(id);
-// [010] Access gate is initialized in index.html, independent of module load.
-const clock=new Clock();const anim=new AnimationDirector();const ai=new BehaviorDirector();const renderer=new CharacterRenderer($('viewport'));
-let now=0;let lastAction='idle';let settings={...{physics:100,speed:100,zoom:100},...loadSettings()};
-const status=t=>$('status').textContent=t;
-// [011] Settings and action controls.
-for(const id of ['physics','speed','zoom']){$(id).value=settings[id];const update=()=>{settings[id]=Number($(id).value);$(id+'Out').textContent=settings[id]+'%';renderer.motion=settings.physics/100;anim.speed=settings.speed/100;renderer.zoom=settings.zoom/100;renderer.fit();saveSettings(settings)};$(id).addEventListener('input',update);update()}
-function action(name){lastAction=name;anim.select(name);document.querySelectorAll('[data-action]').forEach(btn=>btn.classList.toggle('selected',btn.dataset.action===name));$('actionCaption').textContent=`ACTIVE / ${name.toUpperCase()}`}
-document.querySelectorAll('[data-action]').forEach(btn=>btn.addEventListener('click',()=>{ai.enabled=false;$('autoplay').querySelector('b').textContent='OFF';action(btn.dataset.action)}));
-document.querySelectorAll('[data-mood]').forEach(btn=>btn.addEventListener('click',()=>{anim.setMood(btn.dataset.mood);$('moodCaption').textContent=btn.dataset.mood.toUpperCase();document.querySelectorAll('[data-mood]').forEach(b=>b.classList.toggle('selected',b===btn))}));
-$('autoplay').addEventListener('click',()=>{$('autoplay').querySelector('b').textContent=ai.toggle(now)?'ON':'OFF'});
-$('tapPulse').addEventListener('click',()=>renderer.impulse({x:158,y:255},(Math.random()-.5)*100,170));
-bindInteractions(renderer,status);
-// [012] One continuously running physics loop with fixed simulation steps.
-renderer.app.ticker.add(()=>{const dt=Math.min(renderer.app.ticker.deltaMS/1000,.04);clock.run(dt,(s,t)=>{now=t;const newAction=ai.update(t,anim);if(newAction)action(newAction);const pose=anim.update(s);renderer.update(s,t,pose)})});
-try{await renderer.initialize();$('engineLabel').textContent='9 SYSTEMS ONLINE';status('ARTICULATED ARTWORK ONLINE · DRAG CHARACTER · SELECT AN ACTION')}catch(err){console.error('Artwork load failed',err);$('engineLabel').textContent='ARTWORK LOAD ERROR';status('CHARACTER ARTWORK MISSING — CHECK assets/rig PATHS')}
+// [012] Integration root. Character is intentionally not loaded in engine-only milestone.
+import {FixedClock,EventBus} from './engine/core.js';
+import {PhysicsWorld} from './engine/physics.js';
+import {createStandardRig} from './engine/rig.js';
+import {AnimationEngine,installTestClips} from './engine/animation.js';
+import {AssetEngine} from './engine/assets.js';
+import {BehaviorEngine} from './engine/behavior.js';
+import {SceneEngine} from './engine/scenes.js';
+import {SettingsEngine} from './engine/storage.js';
+import {InteractionEngine} from './engine/interaction.js';
+import {RendererEngine} from './engine/render.js';
+import {checkEngines} from './engine/diagnostics.js';
+const $=x=>document.getElementById(x), log=(s)=>{const time=new Date().toLocaleTimeString();$('log').textContent=`[${time}] ${s}\n`+$('log').textContent.slice(0,2500)};
+const clock=new FixedClock(),bus=new EventBus(),physics=new PhysicsWorld(),rig=createStandardRig(),animation=new AnimationEngine(rig),assets=new AssetEngine(),behavior=new BehaviorEngine(),scenes=new SceneEngine(),storage=new SettingsEngine(),interaction=new InteractionEngine($('inputArea')),renderer=new RendererEngine(document.createElement('div'));
+installTestClips(animation);const spring=physics.add('probe',120,120);let paused=false;let last=performance.now(),runs=0;
+const checks=checkEngines();function report(){const flags=[...checks,{name:'PixiJS runtime available',ok:!!globalThis.PIXI},{name:'Character model ready',ok:false,error:'Not yet authored — intentionally excluded'},{name:'Artwork manifest ready',ok:false,error:'No production rig supplied'}];$('metrics').innerHTML=flags.map(x=>`<div class="metric"><span class="small">${x.name}</span><strong class="${x.ok?'ok':'fail'}">${x.ok?'PASS':'NOT READY'}</strong><span class="small">${x.error||'Module initialized'}</span></div>`).join('');return flags.filter(x=>x.ok).length+' / '+flags.length}
+$('diagnose').onclick=()=>log('Diagnostics: '+report()+' checks passing');$('diagnose').click();
+$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'RESUME SIMULATION':'PAUSE SIMULATION'};
+$('impulse').onclick=()=>{physics.pulse('probe',.5,.5,0,130);log('Physics impulse applied')};
+$('auto').onclick=()=>{behavior.enabled=!behavior.enabled;$('auto').textContent=behavior.enabled?'AUTONOMY ON':'AUTONOMY OFF'};
+$('tilt').onclick=async()=>{try{await interaction.enableTilt();log('Tilt input enabled')}catch(e){log(String(e.message))}};
+$('intensity').oninput=e=>{physics.intensity=Number(e.target.value)/100};
+interaction.callback=(event,data)=>{if(event==='poke'||event==='drag'){const rect=$('inputArea').getBoundingClientRect();physics.pulse('probe',(data.x-rect.left)/rect.width,(data.y-rect.top)/rect.height,data.dx*2,data.dy*2)}};
+function tick(t){const delta=Math.min(.04,(t-last)/1000);last=t;if(!paused)clock.advance(delta,(dt)=>{animation.update(dt);physics.tilt=interaction.tilt;physics.update(dt);const next=behavior.update(dt,animation.clips);if(next)animation.play(next);runs++});if(runs%6===0){const idx=Math.floor(spring.nodes.length/2);const p=spring.nodes[idx];const offset=Math.hypot(p.x.x,p.y.x);$('pulseBar').style.width=`${Math.min(200,80+offset*2)}px`;$('mode').textContent=`SIMULATION ${paused?'PAUSED':'RUNNING'} · ${clock.ticks} fixed steps · rig: ${animation.current} · ${globalThis.PIXI?'PixiJS available':'PixiJS unavailable'}`}requestAnimationFrame(tick)}requestAnimationFrame(tick);
+window.addEventListener('error',e=>log('Runtime: '+e.message));window.addEventListener('unhandledrejection',e=>log('Promise: '+String(e.reason)));
+log('Engine core initialized. Character pipeline intentionally not populated.');
