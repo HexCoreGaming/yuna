@@ -1,20 +1,33 @@
-# Yuna Master Web Project — V1.2 (from supplied Pocket V1.0)
+# YUNA POCKET — MASTER PROJECT V1.3
 
-## Launch
-Upload the entire folder unchanged to your static host, or run `run-local.bat` on Windows with Python installed. Open `pocket.html` for the 2.5D character viewer; `index.html` retains the legacy residence.
+This ZIP includes only the 2D/2.5D Pocket character studio. The 3D residence, 3D JavaScript engine, 3D assets, and residence UI are removed.
 
-## New in this version
-- Two-step *visual* entry gate on each app page. Demo codes in `access-gate.js` section 002: `YUNA-ONE` and `YUNA-TWO`. Change before publishing. **IMPORTANT**: This is NOT real authentication. On public GitHub Pages, both codes and all assets are publicly downloadable, even if the overlay hides the app. For actual privacy, use server-side access control.
-- Black void stage (default) or original stage setting; original stage is preserved.
-- Manual NEXT ACTION and optional automatic action rotation with configurable interval.
-- Motion pulse, focused viewport and section-numbered control additions.
-- Original 3D residence and original 2.5D Pocket image assets retained.
+## Start
+- GitHub Pages: upload these files at the site root and open your Pages address. **index.html opens Pocket directly.**
+- On a Windows PC with Python installed, double-click `run-local.bat`.
+- Do not open index.html via `file://` if the browser blocks JavaScript modules; use a local server.
 
-## Important limitations
-Yuna currently uses artwork warps and image layering. These are **not** independent anatomically rigged mesh physics, real walking, or fully rotatable 3D. Existing images cannot automatically produce professional-quality traditional anime animation. Real character animation requires additional layered artwork and rigging. Browser voice is scripted, not an AI language model. No explicit sexual animations are included.
+## Entry sequence
+- First phrase: `YUNA-MOUTH`
+- Second phrase: `LUNA-BUTT`
+- To edit: `access-gate.js`, **[SECTION 002]**.
+- The two screens are a client-side **visual gate, not secure authentication**. If publicly hosted, source files and the phrases can be retrieved without passing the gate.
 
-## Editing guide
-`access-gate.js`: section 002 demo phrases; `pocket/pocket.js`: sections 011–012 new motion and view behaviors; `pocket/pocket.css`: section 013 presentation. Existing application files are otherwise retained.
+## Included controls
+- Dark void or existing illustrated sci-fi stage
+- Four artwork viewing directions
+- Scene library, moods, breathing/walk/dance/sway image animation presets
+- Hair and stylized anime-motion strength sliders
+- Manual action selection, NEXT ACTION, AUTO, speed interval, motion pulse, focus view
+- Voice output using browser speech synthesis and scripted reactions
 
-## Tests
-Run `npm test` from the extracted folder if Node.js is installed. Validate visuals by opening the project in a browser; automated code tests do not guarantee rendering quality.
+## Current limits
+The visual character remains the pre-existing image-based artwork prototype: no professional 2D mesh rig, independently modeled anatomy, genuine 3D rotation, or full live conversational AI is included in this update. No explicit adult animations are included.
+
+## Code landmarks
+- `access-gate.js`: [SECTION 001] entry, [SECTION 002] phrases
+- `pocket/pocket.js`: [SECTION 011] auto actions, [SECTION 012] stage and touch behavior
+- `pocket/pocket.css`: character-only void stage styling
+
+## Verification
+Run `npm test` with Node.js installed. Browser appearance needs visual validation on your device.

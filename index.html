@@ -1,21 +1,60 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#090b16"/><meta name="description" content="Yuna Residence — a private, explorable neo-futuristic home."/><title>YUNA // RESIDENCE</title><link rel="preconnect" href="https://cdn.jsdelivr.net"/><link rel="stylesheet" href="./style.css"/><script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.1/examples/jsm/"}}</script></head><body><div id="app"><div id="loading"><div class="loading-mark">Y<span>✦</span></div><div class="loading-title">YUNA <em>RESIDENCE</em></div><div class="loading-sub">INITIALIZING PRIVATE ENVIRONMENT</div><div class="load-track"><div id="load-progress"></div></div><div id="loading-status">BUILDING THE RESIDENCE</div></div><canvas id="scene" aria-label="3D first person explorable residence"></canvas><div id="vignette"></div><header id="topbar"><div class="brand"><div class="brand-symbol">Y<span>✦</span></div><div><b>YUNA</b><small>PRIVATE RESIDENCE / V.09 + POCKET</small></div></div><div id="location">CENTRAL ATRIUM</div><div class="time"><span class="status-dot"></span><span id="mode-label">NIGHT CYCLE</span><span id="clock">22:08</span></div></header><div id="crosshair"><span></span><span></span></div><div id="interaction"><span class="key">E</span><span id="interaction-name">INTERACT</span></div><div id="toast"></div><div id="bottom-bar"><div class="key-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>MOVE</span></div><div class="key-hint"><kbd>MOUSE</kbd><span>LOOK</span></div><div class="key-hint"><kbd>SHIFT</kbd><span>SPRINT</span></div><div class="key-hint"><kbd>E</kbd><span>INTERACT</span></div><div class="key-hint"><kbd>ESC</kbd><span>UNLOCK</span></div><div class="key-hint"><kbd>M</kbd><span>MAP</span></div><div class="key-hint"><kbd>Y</kbd><span>YUNA</span></div></div><aside id="side-tools"><a href="./pocket.html" class="pocket-menu-link" title="Yuna Pocket · 2.5D" aria-label="Open Yuna Pocket">2D</a><button id="btn-yuna" title="Yuna character (Y)" aria-label="Meet Yuna">✧</button><button id="btn-map" title="Floor plan (M)">⌗</button><button id="btn-settings" title="Settings">⚙</button><button id="btn-help" title="Controls">?</button></aside><section id="intro" class="panel"><div class="eyebrow">WELCOME TO YOUR PRIVATE WORLD</div><h1>YOUR SPACE.<br/><span>YOUR UNIVERSE.</span></h1><p>A cinematic neo-futuristic residence suspended above an endless digital cosmos. Explore the home, discover its rooms, and make it yours.</p><div class="intro-divider"></div><div class="intro-details"><div><small>ARCHITECTURE</small><strong>NEO-FUTURISTIC / MINIMAL</strong></div><div><small>ENVIRONMENT</small><strong>PRIVATE / LOCAL SIMULATION</strong></div><div><small>ACCESS</small><strong>SINGLE PLAYER</strong></div></div><button id="enter" class="primary">ENTER RESIDENCE <span>→</span></button><a href="./pocket.html" class="pocket-entry">✧ ENTER YUNA POCKET <span>2.5D CHARACTER STUDIO ↗</span></a><small class="intro-note">DESKTOP RECOMMENDED · CLICK TO LOCK MOUSE · NO ACCOUNT REQUIRED</small></section><section id="panel-map" class="panel overlay hidden"><button class="close" data-close="panel-map">×</button><div class="eyebrow">ARCHITECTURAL DIRECTORY</div><h2>THE RESIDENCE</h2><p>Choose a destination to move there instantly.</p><div id="map-rooms"></div><div class="overlay-foot">PRESS M OR ESC TO CLOSE</div></section><section id="panel-settings" class="panel overlay hidden"><button class="close" data-close="panel-settings">×</button><div class="eyebrow">ENVIRONMENT CONTROL</div><h2>ATMOSPHERE</h2><label>LIGHTING PRESET</label><div class="toggle-row"><button class="option active" data-mode="night">COSMIC NIGHT</button><button class="option" data-mode="dusk">VIOLET DUSK</button><button class="option" data-mode="day">BLUE HOUR</button></div><label>ACCENT COLOR</label><div class="toggle-row"><button class="swatch selected" data-color="violet" title="Violet"></button><button class="swatch" data-color="cyan" title="Cyan"></button><button class="swatch" data-color="rose" title="Rose"></button></div><label for="quality">RENDER QUALITY</label><select id="quality"><option value="1">BALANCED</option><option value="1.5">HIGH</option><option value="2">ULTRA (POWERFUL GPU)</option></select><label>VISUAL EFFECTS</label><label class="switch"><input type="checkbox" id="bloom" checked/> BLOOM / ATMOSPHERIC GLOW</label><label class="switch"><input type="checkbox" id="motion" checked/> CAMERA MOTION</label><button id="reset" class="secondary">RESTORE DEFAULT SETTINGS</button><div class="overlay-foot">PREFERENCES SAVED IN THIS BROWSER</div></section><section id="panel-help" class="panel overlay hidden"><button class="close" data-close="panel-help">×</button><div class="eyebrow">CONTROLS & SYSTEM</div><h2>EXPLORATION</h2><div class="help-line"><span>W A S D</span><span>WALK</span></div><div class="help-line"><span>MOUSE</span><span>LOOK AROUND</span></div><div class="help-line"><span>SHIFT</span><span>SPRINT</span></div><div class="help-line"><span>E</span><span>USE / TOGGLE OBJECTS</span></div><div class="help-line"><span>M</span><span>OPEN FLOOR PLAN</span></div><div class="help-line"><span>Y</span><span>CHARACTER CONTROLS</span></div><div class="help-line"><span>ESC</span><span>RELEASE CURSOR</span></div><p class="help-note">Yuna is presented as an appearance-first 3D character built directly from the approved four-view artwork. This version focuses on visual fidelity to the image, layered multi-angle presentation, gentle hair motion, and preserved secondary movement controls. She is still not a fully sculpted custom production model, and dialogue is scripted only.</p></section><section id="panel-yuna" class="panel overlay yuna-panel hidden" aria-label="Yuna character controls">
- <button class="close" data-close="panel-yuna">×</button>
- <div class="eyebrow">VISUAL CONSTRUCT / 0.9</div>
- <h2>MEET YUNA</h2>
- <div class="yuna-status"><span class="status-dot"></span> 3D CHARACTER / ANIMATED <span class="pill-muted">LOCAL</span></div>
- <p>This update focuses on Yuna's appearance only. She is now rendered using the approved front, side, and back artwork in a layered multi-angle 3D presentation designed to look closer to the reference image. This remains an image-based 3D character, not a hand-sculpted production asset.</p>
- <div class="dialogue-caption">LIVING HOLOGRAPHIC CHARACTER</div><div class="mode-explainer">8-ANGLE APPEARANCE-FIRST 3D PRESENTATION · Layered holographic hair · Walking and secondary motion. Yuna does not automatically turn to face you.</div><div class="dialogue-caption">WALKING & MOVEMENT</div><div class="yuna-actions"><button id="btn-yuna-wander" class="option">PAUSE WANDERING</button><button id="btn-yuna-stage" class="option">VIEW CHARACTER UP CLOSE</button></div><div class="dialogue-caption">SECONDARY BODY PHYSICS</div><input id="secondary-strength" class="wide-slider" type="range" min="0" max="2.5" step="0.1" value="1.0" /><div class="mode-explainer">Spring-damped chest and rear movement while walking. The width of the hips stays fixed; motion is independent and volume-directed.</div><div class="dialogue-caption">ROTATION / FREE VIEW</div><div class="yuna-actions"><button id="btn-yuna-left" class="option">↶ TURN 45°</button><button id="btn-yuna-right" class="option">TURN 45° ↷</button></div><button id="btn-yuna-reset-facing" class="secondary">RESET FACING DIRECTION</button><div class="dialogue-caption">SCRIPTED PREVIEW · NOT AI CHAT</div>
- <div id="yuna-dialogue" class="yuna-dialogue">“Welcome home. I've been waiting by the atrium.”</div>
- <div class="yuna-actions"><button id="btn-yuna-wave" class="option">WAVE HELLO</button><button id="btn-yuna-line" class="option">ANOTHER LINE</button></div>
- <button id="btn-yuna-find" class="secondary">GO TO YUNA IN THE ATRIUM →</button>
- <label for="hair-strength">FLOATING HAIR / UNDERWATER MOTION</label>
- <input id="hair-strength" class="wide-slider" type="range" min="0" max="2.5" step="0.1" value="1.0" />
- <div class="mode-explainer">AUTOMATIC PLAYER-FACING: OFF · You can walk behind Yuna without her turning around.</div>
- <div class="dialogue-caption">APPROVED CHARACTER ARTWORK</div>
- <button id="btn-character-reference" class="ref-thumb" title="Open full four-view design"><img src="./assets/yuna-approved-reference.webp" alt="Approved Yuna front, left, right and back visual reference" /><span>EXPAND REFERENCE ↗</span></button>
- <div class="overlay-foot">APPROVED ARTWORK-DRIVEN 3D PRESENTATION · MULTI-ANGLE VIEW CARDS · GENTLE HAIR AND SECONDARY MOTION. NOT A HAND-SCULPTED REPLICA.</div>
- </section>
- <div id="character-reference-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Approved Yuna character reference"><button id="close-character-reference" aria-label="Close reference">×</button><img src="./assets/yuna-approved-reference.webp" alt="Approved Yuna character reference, four views" /></div>
- <div id="yuna-status-bubble"><span class="status-dot"></span> YUNA // APPEARANCE MODE <small>FREE 360° VIEW · PRESS Y</small></div>
- <div id="reticle-prompt">CLICK TO RESUME EXPLORING</div><div id="corner-number">01 <span>/ PRIVATE WORLD</span></div><div class="mobile-notice">For first-person mouse navigation, open on a desktop or laptop.</div></div><script type="module" src="./src/main.js"></script><script src="./access-gate.js" defer></script>
-</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+ <meta name="theme-color" content="#080913" />
+ <title>YUNA // POCKET · Private Character Studio</title>
+ <meta name="description" content="Yuna Pocket: an interactive anime-style 2.5D character studio." />
+ <link rel="stylesheet" href="./pocket/pocket.css" />
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-mark">Y<span>✦</span></div><div><b>YUNA <em>/</em> POCKET</b><small>PRIVATE CHARACTER STUDIO <span class="version">/ V1.2</span></small></div></div>
+    <div class="top-actions"><span class="local-pill"><i></i> LOCAL SESSION</span></div>
+  </header>
+  <main class="layout">
+   <aside class="rail">
+    <div class="rail-top"><span class="eyebrow">LIBRARY <i>01 / 05</i></span><h2>Choose<br/><span>a moment.</span></h2><p>Small moments, made to feel alive.</p></div>
+    <div id="scene-list" class="scene-list" role="list"></div>
+    <div class="rail-foot"><span>CHARACTER ENGINE</span><strong>2.5D / LAYERED</strong><small>Original approved Yuna artwork</small></div>
+   </aside>
+   <section class="theater" id="theater" aria-label="Interactive Yuna animation scene">
+     <div class="cosmos" id="cosmos"></div>
+     <div class="architectural arch-left"></div><div class="architectural arch-right"></div>
+     <div class="backwall"><span></span><span></span><span></span><span></span><span></span></div>
+     <div class="light-ring light-ring-a"></div><div class="light-ring light-ring-b"></div>
+     <div class="stage-grid"></div>
+     <div class="horizon-line"></div>
+     <div class="stage-shadow"></div>
+     <div class="stage-pedestal"><div class="pedestal-rim"></div></div>
+     <canvas id="pocket-canvas" aria-label="Animated Yuna: tap face, hair, shoulder or hands for a reaction"></canvas>
+     <div class="stage-topleft"><div class="eyebrow" id="scene-category">MOMENT / 01</div><h1 id="stage-title">First Light</h1><p id="stage-subtitle">A quiet moment, just for you.</p></div>
+     <div class="stage-topright"><span class="live-led"></span><span id="motion-readout">IDLE · LIVE MOTION</span></div>
+     <div class="stage-tip" id="stage-tip"><span class="tiny-cross">✧</span> CLICK / TAP YUNA TO INTERACT</div>
+     <div class="stage-toast" id="stage-toast" aria-live="polite"></div>
+     <div class="view-controls"><button type="button" id="rotate-left" aria-label="Turn Yuna left">↶</button><span id="view-name">FRONT VIEW</span><button type="button" id="rotate-right" aria-label="Turn Yuna right">↷</button></div>
+     <div class="cinematic-bars"></div>
+   </section>
+   <aside class="control-panel">
+     <div class="panel-header"><div class="eyebrow">THE CHARACTER <span>✦</span></div><h2>She’s here.</h2><p>A living hologram, animated from your original design.</p></div>
+     <div class="panel-group"><div class="control-title"><span>01</span> EXPRESSION</div><div class="mood-grid" id="moods"><button class="mood selected" data-mood="calm">◌ <span>Calm</span></button><button class="mood" data-mood="happy">✧ <span>Happy</span></button><button class="mood" data-mood="curious">◇ <span>Curious</span></button><button class="mood" data-mood="playful">✳ <span>Playful</span></button></div></div>
+     <div class="panel-group"><div class="control-title"><span>02</span> MOTION</div><div class="motion-row"><button id="pose-breathe" class="motion-btn selected" data-action="breathe">Breathe</button><button id="pose-walk" class="motion-btn" data-action="walk">Walk</button><button id="pose-dance" class="motion-btn" data-action="dance">Dance</button><button id="pose-wave" class="motion-btn" data-action="sway">Sway</button></div><label class="slider-label" for="hair-flow">FLOWING HAIR <output id="hair-value">75%</output></label><input id="hair-flow" class="range" type="range" min="0" max="200" value="75"/><label class="slider-label" for="physics">ANIME PHYSICS <output id="physics-value">85%</output></label><input id="physics" class="range" type="range" min="0" max="250" value="85"/><p class="helper">Animation intensity changes movement; it doesn't change her basic proportions.</p></div>
+     <div class="panel-group"><div class="control-title"><span>03</span> CHARACTER STUDIO</div>
+ <label class="slider-label" for="stage-mode">STAGE APPEARANCE</label>
+ <select id="stage-mode" class="studio-select"><option value="void">Black void / character only</option><option value="original">Original sci-fi stage</option></select>
+ <div class="motion-row"><button id="auto-toggle" class="motion-btn" type="button">▶ AUTO OFF</button><button id="action-next" class="motion-btn" type="button">NEXT ACTION ↦</button></div>
+ <label class="slider-label" for="auto-seconds">AUTO ACTION INTERVAL <output id="auto-seconds-value">8s</output></label><input id="auto-seconds" class="range" type="range" min="3" max="25" value="8"/>
+ <div class="motion-row"><button id="burst-btn" class="motion-btn" type="button">✦ MOTION PULSE</button><button id="hide-ui" class="motion-btn" type="button">FOCUS VIEW</button></div>
+ <p class="helper">Existing image-based 2.5D art is preserved. Movement pulses are stylized warps, not independent rigged anatomy.</p></div>
+ <div class="panel-group dialogue-panel"><div class="control-title"><span>04</span> VOICE & REACTION</div><div class="speech-bubble" id="speech-bubble" aria-live="polite">“Welcome. I was hoping you'd stop by.”</div><form id="chat-form"><input type="text" id="chat-input" aria-label="Say something to Yuna" placeholder="Say something to Yuna…" maxlength="160" autocomplete="off" /><button type="submit" aria-label="Send message">➤</button></form><div class="speak-row"><button id="speak-btn" type="button">◉ <span>HEAR HER VOICE</span></button><button id="mute-btn" type="button" aria-label="Toggle voice">VOICE ON</button></div><p class="disclosure">Scripted responses + your browser's speech synthesis. This is not an AI language model or live conversation.</p></div>
+     <footer class="panel-footer"><span>YUNA / PERSONAL SIMULATION</span><div><button id="pause-btn" title="Pause animation">Ⅱ PAUSE</button><button id="reset-btn" title="Reset Yuna">↺ RESET</button></div></footer>
+   </aside>
+  </main>
+  <footer class="bottomline"><span>✦ YUNA POCKET</span><span>YOUR WORLD. YOUR PACE.</span><span>ARTWORK-BASED 2.5D STUDIO · NO ACCOUNT</span></footer>
+</div>
+<script type="module" src="./pocket/pocket.js"></script>
+<script src="./access-gate.js" defer></script>
+</body>
+</html>
