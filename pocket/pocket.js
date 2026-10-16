@@ -19,13 +19,14 @@ const state = {
   turnTime:0, gestureUntil:0, gaze:{x:0,y:0}, pointer:{x:0,y:0},
   tinyWave:0, blinkTimer:3.1, blink:0, speakEnvelope:0,
   auto:false, autoSeconds:8, nextAuto:0, stageMode:'void', focus:false,
-  walkTravel:0, interactionCount:0, screen:{w:900,h:800,dpr:1,scale:1,baseX:0,topY:0,drawW:0,drawH:0}
+  zoom:1, dragActive:false, dragZone:'', dragLast:null,
+  ambientMoodTimer:12, expressionTimer:0, interactionCount:0, walkTravel:0, screen:{w:900,h:800,dpr:1,scale:1,baseX:0,topY:0,drawW:0,drawH:0}
 };
-const rig = {chest: new Spring(15,.78),rear: new Spring(12,.78),hip: new Spring(10,.78),head: new Spring(9,.85),hair: new Spring(7,.87),gesture: new Spring(10,.79)};
+const rig = {chest: new Spring(15,.78),rear: new Spring(12,.78),hip: new Spring(10,.78),head: new Spring(9,.85),hair: new Spring(7,.87),gesture: new Spring(10,.79),torso:new Spring(8,.78),gazeX:new Spring(9,.74),gazeY:new Spring(9,.74)};
 let activeSpeech = null, toastHandle = 0;
 let lastTick = 0;
 // [SECTION 011] AUTONOMOUS ACTION PLAYER — manual and optional automatic sequences
-const AUTO_ACTIONS = ['breathe','sway','walk','dance','sway','breathe'];
+const AUTO_ACTIONS = ['breathe','look','sway','stretch','giggle','dance','walk','nod','breathe'];
 let autoIndex = 0;
 function runNextAction(){
   const action=AUTO_ACTIONS[autoIndex++ % AUTO_ACTIONS.length];
@@ -76,10 +77,14 @@ function setMood(mood) {
   else toast('YUNA / CALM');
 }
 function setMotion(mode){
-  if(!['breathe','walk','dance','sway'].includes(mode)) return;
+  if(!['breathe','walk','dance','sway','stretch','giggle','nod','look'].includes(mode)) return;
   state.motion=mode;
   state.gestureUntil = (mode==='sway') ? state.time+3.3 : 0;
   if(mode==='walk'||mode==='dance') rig.chest.kick(1.7*state.physics);
+  if(mode==='stretch'){rig.torso.kick(-4);rig.head.kick(-1.5);rig.hair.kick(2.5)}
+  if(mode==='giggle'){rig.head.kick(1.8);rig.chest.kick(2);state.expressionTimer=state.time+4;state.mood='happy'}
+  if(mode==='nod')rig.head.kick(2.8);
+  if(mode==='look')state.mood='curious';
   document.querySelectorAll('[data-action]').forEach(btn=>btn.classList.toggle('selected',btn.dataset.action===mode));
   $('motion-readout').textContent = `${mode.toUpperCase()} · LIVE MOTION`;
 }
@@ -129,14 +134,16 @@ function drawBaseWarp(img, x, top, dw, dh, t, motion, sideGain=1) {
     const h=Math.min(step,sh-srcY);
     const p=srcY/sh;
     const isHead=gauss(p,.125,.115), isChest=gauss(p,.31,.075), isHip=gauss(p,.55,.10), isLower=smoothstep(.52,.96,p);
+    const torsoLift=rig.torso.value*gauss(p,.35,.25), nod=rig.head.value*isHead*.9;
     const wave=Math.sin(t*1.12+p*4.8)*(.95+state.hair*.9)*isHead*2;
     const upperX=(head*4+wave)*isHead+(dance?Math.sin(t*1.7+p*2)*6:0) +Math.sin(t*.7)*1.4;
     const lowerX=hip*4*isHip+ (motion==='walk'?Math.sin(state.motionPhase+p*4.5)*5*isLower:0);
     const chestMotion=(isChest*chest*2.9),lowerMotion=isHip*rear*2;
     const widthFactor=1+(isChest*Math.max(-.017,Math.min(.020,chest*.018)))+(isHip*Math.max(-.008,Math.min(.012,hip*.012)));
-    const yMotion=chestMotion+lowerMotion;
+    const yMotion=chestMotion+lowerMotion+torsoLift+nod;
+    const moodDrift=rig.gazeX.value*isHead*.75;
     const srcH=Math.min(h+1,sh-srcY);
-    const targetX=x - dw/2 + (upperX+lowerX)*scaleX - dw*(widthFactor-1)/2;
+    const targetX=x - dw/2 + (upperX+lowerX+moodDrift)*scaleX - dw*(widthFactor-1)/2;
     const targetY=top + srcY*scaleY+yMotion*scaleY;
     const targetW=dw*widthFactor,targetH=srcH*scaleY+.7;
     if (motion==='walk' && p>.54 && (img===images.front||img===images.back)) {
@@ -200,7 +207,14 @@ function drawFaceExpressions(x,top,dw,dh,front,t){
     for(const ex of [-27,27]) {ctx.beginPath();ctx.moveTo(x+(ex-17)*scale,eyeY);ctx.quadraticCurveTo(x+ex*scale,eyeY+6*scale,x+(ex+16)*scale,eyeY);ctx.stroke();}
     ctx.restore();
   }
-  if(state.mood==='happy'||state.mood==='playful'){
+  // [SECTION 014] LIVING FACE OVERLAY / EYES AND EXPRESSIONS
+  const glanceX=rig.gazeX.value*2.8*scale, glanceY=rig.gazeY.value*1.9*scale;
+  if(state.mood==='curious'||state.mood==='playful'){
+    ctx.save();ctx.globalAlpha=.27;ctx.fillStyle='#afe7ff';
+    for(const ex of [-27,27]){ctx.beginPath();ctx.arc(x+ex*scale+glanceX,top+99*scale+glanceY,1.9*scale,0,Math.PI*2);ctx.fill()}
+    ctx.restore();
+  }
+  if(state.mood==='happy'||state.mood==='playful'||state.motion==='giggle'){
     ctx.save();ctx.strokeStyle='rgba(202,193,255,.28)';ctx.lineWidth=.8*scale;
     ctx.beginPath();ctx.arc(mouthX,mouthY+4*scale,8*scale,.13,Math.PI-.13);ctx.stroke();ctx.restore();
   }
@@ -218,7 +232,7 @@ function render(t){
   const motion=state.motion;
   const baseImg=images[viewA];
   const nativeHeight=883;
-  const charHeight=clamp(Math.min(h*.83,w*.98*.001*nativeHeight),h*.57,h*.83);
+  const charHeight=clamp(Math.min(h*.83,w*.98*.001*nativeHeight),h*.57,h*.83)*state.zoom;
   const drawH=charHeight;
   const baseW=(viewA==='back'?366:viewA==='right'?316:321);
   const turnNarrow=1-.14*Math.sin(Math.abs(yaw)%Math.PI);
@@ -283,6 +297,16 @@ function animate(now){
   rig.head.update(Math.sin(t*.7)*.12 + (state.mood==='curious'?.25:0),dt);
   rig.hair.update(Math.sin(t*.59)*.6*state.hair+travel*.3*mult,dt);
   rig.gesture.update(state.motion==='sway'&&t<state.gestureUntil?1:0,dt);
+  // [SECTION 013] SECONDARY ACTION CHANNELS (additive to the image warp)
+  const stretch=state.motion==='stretch', giggle=state.motion==='giggle', nod=state.motion==='nod';
+  rig.torso.update(stretch? -2.2 + Math.sin(t*1.6)*1.1:Math.sin(t*1.32)*.15,dt);
+  if(giggle){rig.chest.kick(Math.sin(t*13)*.055*energy);rig.hair.kick(Math.sin(t*10)*.04)}
+  if(nod)rig.head.kick(Math.cos(t*7)*.045);
+  rig.gazeX.update(state.pointer.x*1.1,dt);rig.gazeY.update(state.pointer.y*.65,dt);
+  if(state.auto){state.ambientMoodTimer-=dt;if(state.ambientMoodTimer<=0){
+    state.ambientMoodTimer=7+(Math.sin(t*2.7)+1)*3;
+    setMood(MOODS[Math.floor(Math.abs(Math.sin(t*1.73))*MOODS.length)%MOODS.length]);
+  }}
   // Angle settles smoothly at a quarter turn per click.
   const d=state.targetYaw-state.yaw;state.yaw+=d*clamp(dt*7.5,0,1);
   if(Math.abs(d)<.001)state.yaw=state.targetYaw;
@@ -291,6 +315,7 @@ function animate(now){
   state.blink=Math.max(0,state.blink-dt*6);
   state.speakEnvelope=state.speaking?(Math.abs(Math.sin(t*11.7)*Math.cos(t*6.2))*.75+.20):0;
   if(state.speaking&&t>state.speechUntil){state.speaking=false}
+  if(state.expressionTimer&&t>state.expressionTimer){state.expressionTimer=0;if(!state.auto)setMood('calm')}
   render(t);updateViewLabel();
 }
 function interactCanvas(ev){
@@ -306,7 +331,8 @@ function interactCanvas(ev){
 }
 function reset(){
   state.auto=false;state.nextAuto=0;updateAutoControls();
-  state.mood='calm';state.motion='breathe';state.yaw=0;state.targetYaw=0;state.physics=.85;state.hair=.75;state.paused=false;
+  state.zoom=1;state.mood='calm';state.motion='breathe';state.yaw=0;state.targetYaw=0;state.physics=.85;state.hair=.75;state.paused=false;
+  $('character-zoom').value=100;$('zoom-value').textContent='100%';
   $('hair-flow').value=75;$('physics').value=85;$('hair-value').value='75%';$('physics-value').value='85%';
   $('pause-btn').textContent='Ⅱ PAUSE';for(const item of Object.values(rig))item.reset();
   selectScene('first');setMood('calm');toast('YUNA / RESET');
@@ -340,6 +366,9 @@ function wire(){
     $('hide-ui').textContent=state.focus?'EXIT FOCUS':'FOCUS VIEW';
   });
   updateAutoControls();
+  // [SECTION 015] ZOOM AND TOUCH-DRAG MOTION CONTROLS
+  $('character-zoom').addEventListener('input',ev=>{state.zoom=Number(ev.target.value)/100;$('zoom-value').textContent=ev.target.value+'%'});
+  $('giggle-btn').addEventListener('click',()=>{setMotion('giggle');speak('Hehe! That tickles!')});
   document.querySelectorAll('[data-mood]').forEach(el=>el.addEventListener('click',()=>setMood(el.dataset.mood)));
   document.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>setMotion(el.dataset.action)));
   $('rotate-left').addEventListener('click',()=>rotateBy(-1));$('rotate-right').addEventListener('click',()=>rotateBy(1));
@@ -357,7 +386,11 @@ function wire(){
   $('pause-btn').addEventListener('click',()=>{state.paused=!state.paused;$('pause-btn').textContent=state.paused?'▶ RESUME':'Ⅱ PAUSE'});
   $('reset-btn').addEventListener('click',reset);
   let down = null, suppressClick = false;
-  canvas.addEventListener('pointerdown',ev=>{down={x:ev.clientX,y:ev.clientY,time:performance.now()}});
+  canvas.addEventListener('pointerdown',ev=>{
+    down={x:ev.clientX,y:ev.clientY,time:performance.now()};
+    state.dragActive=true;state.dragLast={x:ev.clientX,y:ev.clientY};
+    try{canvas.setPointerCapture(ev.pointerId)}catch{}
+  });
   canvas.addEventListener('pointerup',ev=>{
     if(!down)return;
     const diff=ev.clientX-down.x,dy=ev.clientY-down.y;
@@ -365,13 +398,24 @@ function wire(){
       rotateBy(diff>0?-1:1);suppressClick=true;
       setTimeout(()=>suppressClick=false,100);
     }
-    down=null;
+    down=null;state.dragActive=false;state.dragLast=null;
   });
-  canvas.addEventListener('pointercancel',()=>{down=null});
+  canvas.addEventListener('pointercancel',()=>{down=null;state.dragActive=false;state.dragLast=null});
   canvas.addEventListener('click',ev=>{if(!suppressClick)interactCanvas(ev)});
   canvas.addEventListener('pointermove',ev=>{
     const rect=canvas.getBoundingClientRect();state.pointer.x=clamp((ev.clientX-rect.left)/rect.width*2-1,-1,1);
     state.pointer.y=clamp((ev.clientY-rect.top)/rect.height*2-1,-1,1);
+    if(state.dragActive&&state.dragLast){
+      const {baseX,topY,drawW,drawH}=state.screen;
+      const u=(ev.clientX-baseX)/Math.max(drawW,1),v=(ev.clientY-topY)/Math.max(drawH,1);
+      const dx=clamp((ev.clientX-state.dragLast.x)/18,-2,2),dy=clamp((ev.clientY-state.dragLast.y)/18,-2,2);
+      if(Math.abs(u)<.62&&v>0&&v<1){
+        if(v<.27){rig.hair.kick(dx*2.4);rig.head.kick(dy*.8)}
+        else if(v<.53){rig.torso.kick(dy*.8);rig.chest.kick(dx*.65)}
+        else{rig.hip.kick(dx*.85);rig.rear.kick(dy*.7)}
+      }
+      state.dragLast={x:ev.clientX,y:ev.clientY};
+    }
   });
   document.addEventListener('keydown',ev=>{
     if(['INPUT','TEXTAREA'].includes(document.activeElement?.tagName))return;

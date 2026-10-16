@@ -21,3 +21,8 @@
 @media (max-width:700px){.studio-select{font-size:16px}}
 
 .focus-view #hide-ui{display:block!important;position:fixed;right:20px;bottom:20px;z-index:2000;background:#17122b;color:white;padding:12px;border:1px solid #8a65cf;border-radius:10px}
+
+/* [SECTION 016] V1.4 EXTENDED MOTION CONTROLS */
+.extra-motions{margin-top:7px;flex-wrap:wrap}.extra-motions .motion-btn{min-width:60px;flex:1 1 65px}
+#character-zoom{accent-color:#a8a1ff}
+#pocket-canvas{touch-action:none}

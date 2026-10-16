@@ -1,33 +1,25 @@
-# YUNA POCKET — MASTER PROJECT V1.3
+# Yuna Pocket V1.4 — Living Character Foundation
 
-This ZIP includes only the 2D/2.5D Pocket character studio. The 3D residence, 3D JavaScript engine, 3D assets, and residence UI are removed.
+Pocket-only full replacement project. No 3D residence. Place the entire extracted contents in your GitHub Pages repository root.
 
-## Start
-- GitHub Pages: upload these files at the site root and open your Pages address. **index.html opens Pocket directly.**
-- On a Windows PC with Python installed, double-click `run-local.bat`.
-- Do not open index.html via `file://` if the browser blocks JavaScript modules; use a local server.
+## Visual entry phrases
+First: `YUNA-MOUTH`  /  Second: `LUNA-BUTT`
+These are **client-side navigation gates**, not real protection of public files.
 
-## Entry sequence
-- First phrase: `YUNA-MOUTH`
-- Second phrase: `LUNA-BUTT`
-- To edit: `access-gate.js`, **[SECTION 002]**.
-- The two screens are a client-side **visual gate, not secure authentication**. If publicly hosted, source files and the phrases can be retrieved without passing the gate.
+## Changes from V1.3
+- Separate Stretch, Giggle, Nod, and Look actions built upon the existing layered art renderer
+- On-canvas dragging produces regional spring reactions (hair, torso, hip)
+- Cursor-following head drift and light eye gleam when curious/playful
+- Character zoom 65%–145%
+- Automatic action cycle now uses 8 distinct actions and varies mood periodically
+- Dedicated giggle-with-voice button; expressive secondary motion blended into actions
+- Existing dark stage, four-angle turn, scene library, voice, gates, settings and controls maintained
 
-## Included controls
-- Dark void or existing illustrated sci-fi stage
-- Four artwork viewing directions
-- Scene library, moods, breathing/walk/dance/sway image animation presets
-- Hair and stylized anime-motion strength sliders
-- Manual action selection, NEXT ACTION, AUTO, speed interval, motion pulse, focus view
-- Voice output using browser speech synthesis and scripted reactions
+## IMPORTANT LIMITATIONS
+This still uses the original flattened directional images and overlay hair cuts. **It is not a professional Live2D rig**. Facial details and body areas are not fully separated, so stretching/warp effects will not behave like true independently articulated anatomy. Camera rotation is cross-fading between four images. There are no explicit animations or new nude assets. Future professional quality requires properly layered redraws, masks, pivots, and art-directed deformations.
 
-## Current limits
-The visual character remains the pre-existing image-based artwork prototype: no professional 2D mesh rig, independently modeled anatomy, genuine 3D rotation, or full live conversational AI is included in this update. No explicit adult animations are included.
+## Numbered landmarks
+`pocket/pocket.js` [SECTION 013] motions, [SECTION 014] face overlay, [SECTION 015] drag/zoom. `pocket/pocket.css` [SECTION 016] controls. Existing [SECTION 011] auto player and [SECTION 012] stage controls preserved.
 
-## Code landmarks
-- `access-gate.js`: [SECTION 001] entry, [SECTION 002] phrases
-- `pocket/pocket.js`: [SECTION 011] auto actions, [SECTION 012] stage and touch behavior
-- `pocket/pocket.css`: character-only void stage styling
-
-## Verification
-Run `npm test` with Node.js installed. Browser appearance needs visual validation on your device.
+## Local run
+Open `run-local.bat` on Windows if Python is installed, or serve with `python -m http.server 8000` and visit localhost:8000. For tests install Node and use `npm test`.
