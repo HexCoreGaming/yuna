@@ -1,0 +1,2 @@
+// [004] Autonomous behavior state selector, non-repeating action scheduler.
+export class BehaviorDirector{constructor(){this.enabled=false;this.next=0;this.last='idle';this.actions=['wave','dance','stretch','laugh','pose','idle']}update(time,animation){if(!this.enabled||time<this.next)return;let next;do{next=this.actions[Math.floor(Math.random()*this.actions.length)]}while(next===this.last);this.last=next;animation.select(next);this.next=time+2.8+Math.random()*3.8;return next}toggle(time){this.enabled=!this.enabled;this.next=time+1;return this.enabled}}

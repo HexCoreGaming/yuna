@@ -1,23 +1,24 @@
-# Yuna Pocket V1.0.2 — Legacy Files Cleared
+# Yuna Pocket V1.1.0 — modular character-engine foundation
 
-This update clears all old application generations from the uploaded ZIP.
+Open `index.html` through GitHub Pages or a local HTTP server; PixiJS v7 loads from a CDN. Opening from `file://` may block module/image loading. Front end only; no account, external AI, or secure authentication.
 
-## Active application files
-- index.html — entry point and two-step access interface
-- app.js — V1.0.2 2D cutout canvas renderer and controls
-- styles.css — current interface styles
-- assets/rig/*.webp — 11 painted layers loaded by app.js
-- .nojekyll — empty GitHub Pages configuration file
+## What is genuinely implemented
+- PixiJS WebGL renderer and eleven separate existing painted animation layers.
+- Joint-pivot transformations for head, torso, pelvis, legs, and both arms.
+- Two independently deformable WebGL meshes; damped spring vertices and pointer impulses.
+- Fixed-step simulation scheduler, parameter animation blends, named actions.
+- Autonomous action scheduling and manual intervention.
+- Pointer/touch input, optional device orientation, and saved user preferences.
+- Two screen passphrase flow, neo-futuristic UI, V1.1.0 first screen.
 
-## Cleared obsolete files
-All other files in this archive are intentionally **zero bytes**, including older 3D source, earlier Pocket engine, duplicate pages, unused artwork, tests and obsolete package manifests. They are no longer executable applications. Delete these blank placeholders from GitHub later if desired.
+## Actual limitations
+- This is **not a Live2D Cubism export** or hand-authored professional deformer rig. It uses source 321x883 painted layers, so hands do not grip objects, mouth is not independently drawn, there are no expression textures, and articulation/occlusion is still limited.
+- No room, Luna, external AI, sound, or new professional character art is included.
+- Display-only password checks are not access control on GitHub Pages.
+- CDN library required. The renderer must be checked visually on the intended device; code checks alone are not visual QA.
 
-## Login phrases
-Screen 1: YUNA-MOUTH
-Screen 2: LUNA-BUTT
+## Numbered source sections
+001 core, 002 physics, 003 animation, 004 autonomy, 005 asset manifest, 006 renderer, 007 interaction, 008 storage, 009–012 application.
 
-## Honest visual limitation
-This cleanup changes project structure, not character quality. The current animated artwork is still a layered cutout, not a deformable professional anime rig.
-
-## Installation
-Upload the contents to your GitHub Pages repository, replacing existing files. To truly remove obsolete files from the repository, delete the old files that are not in the active-file list above; empty uploads only overwrite files that exist under matching paths.
+### Next character-production requirement
+Create production anime artwork with separate face features, hair locks, ears/tail, hands, upper/lower limbs and hidden overlap painting; author deformation meshes and expressions in Live2D Cubism or equivalent compatible format; integrate the actual exported runtime. These steps cannot be supplied by creating primitive SVG figures.
