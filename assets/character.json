@@ -1,0 +1,119 @@
+{
+  "schema": "yuna-layer-rig/v1",
+  "canvas": {
+    "width": 321,
+    "height": 883
+  },
+  "layers": [
+    {
+      "id": "leg_far",
+      "url": "assets/rig/leg_far.webp",
+      "pivot": [
+        184,
+        503
+      ],
+      "channel": "legRight",
+      "gain": 0.35
+    },
+    {
+      "id": "leg_near",
+      "url": "assets/rig/leg_near.webp",
+      "pivot": [
+        126,
+        508
+      ],
+      "channel": "legLeft",
+      "gain": 0.35
+    },
+    {
+      "id": "hip",
+      "url": "assets/rig/hip.webp",
+      "pivot": [
+        161,
+        473
+      ],
+      "channel": "hipTurn",
+      "gain": 0.35
+    },
+    {
+      "id": "torso",
+      "url": "assets/rig/torso.webp",
+      "pivot": [
+        158,
+        373
+      ],
+      "channel": "torsoLean",
+      "gain": 0.35
+    },
+    {
+      "id": "bust_l",
+      "url": "assets/rig/bust_l.webp",
+      "pivot": [
+        125,
+        285
+      ],
+      "channel": null,
+      "gain": 0.35
+    },
+    {
+      "id": "bust_r",
+      "url": "assets/rig/bust_r.webp",
+      "pivot": [
+        192,
+        286
+      ],
+      "channel": null,
+      "gain": 0.35
+    },
+    {
+      "id": "arm_l_upper",
+      "url": "assets/rig/arm_l_upper.webp",
+      "pivot": [
+        89,
+        213
+      ],
+      "channel": "armLeft",
+      "gain": 0.35
+    },
+    {
+      "id": "arm_r_upper",
+      "url": "assets/rig/arm_r_upper.webp",
+      "pivot": [
+        245,
+        214
+      ],
+      "channel": "armRight",
+      "gain": 0.35
+    },
+    {
+      "id": "arm_l_fore",
+      "url": "assets/rig/arm_l_fore.webp",
+      "pivot": [
+        48,
+        359
+      ],
+      "channel": "armLeft",
+      "gain": 0.35
+    },
+    {
+      "id": "arm_r_fore",
+      "url": "assets/rig/arm_r_fore.webp",
+      "pivot": [
+        281,
+        359
+      ],
+      "channel": "armRight",
+      "gain": 0.35
+    },
+    {
+      "id": "head",
+      "url": "assets/rig/head.webp",
+      "pivot": [
+        158,
+        168
+      ],
+      "channel": "headTurn",
+      "gain": 0.2
+    }
+  ]
+}
