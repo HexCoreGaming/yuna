@@ -1,7 +1,39 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070913"><title>YUNA POCKET · V1.1.0</title><link rel="stylesheet" href="styles.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.3/pixi.min.js"></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070913"><title>YUNA POCKET · V1.1.1</title><link rel="stylesheet" href="styles.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.3/pixi.min.js"></script></head><body>
 <div id="viewport" aria-label="Interactive animated Yuna"></div><div class="screen-fx" aria-hidden="true"></div>
-<header class="top"><div class="identity"><span class="sigil">Y</span><div><strong>YUNA <em>POCKET</em></strong><small>HEXCORE / CHARACTER SYSTEMS</small></div></div><div class="version">BUILD V1.1.0 <span id="engineLabel">ENGINE INITIALIZING</span></div></header>
+<header class="top"><div class="identity"><span class="sigil">Y</span><div><strong>YUNA <em>POCKET</em></strong><small>HEXCORE / CHARACTER SYSTEMS</small></div></div><div class="version">BUILD V1.1.1 <span id="engineLabel">ENGINE INITIALIZING</span></div></header>
 <aside class="sidebar"><div class="eyebrow">CHARACTER DIRECTOR</div><h2>Motion studio</h2><p class="hint">Articulated painted layers · live motion systems</p><div class="group"><label class="groupname">PERFORM</label><div class="buttons"><button data-action="idle" class="selected">Idle</button><button data-action="wave">Wave</button><button data-action="dance">Dance</button><button data-action="stretch">Stretch</button><button data-action="laugh">Laugh</button><button data-action="pose">Pose</button></div></div><div class="group"><label class="groupname">LIVING CHARACTER</label><div class="buttons"><button id="autoplay">Auto <b>OFF</b></button><button id="tapPulse">Motion pulse</button><button id="tilt">Phone tilt</button></div></div><div class="group"><label class="groupname" for="physics">SECONDARY MOTION <output id="physicsOut">100%</output></label><input id="physics" type="range" min="0" max="200" value="100"><label class="groupname" for="speed">ANIMATION SPEED <output id="speedOut">100%</output></label><input id="speed" type="range" min="30" max="180" value="100"><label class="groupname" for="zoom">CHARACTER ZOOM <output id="zoomOut">100%</output></label><input id="zoom" type="range" min="65" max="155" value="100"></div><div class="group"><div class="groupname">MOOD</div><div class="buttons"><button data-mood="calm" class="selected">Calm</button><button data-mood="happy">Happy</button><button data-mood="mischievous">Playful</button></div></div><div class="group"><div class="groupname">ENGINE STATUS</div><div class="status" id="status">Loading painted layers…</div></div></aside>
-<div class="stage-caption"><span class="state-led"></span> <span id="actionCaption">STANDBY / IDLE</span><span class="divider">/</span><span id="moodCaption">CALM</span></div><footer>POINTER DRAG · TAP REACTION · WEBGL SPRING MESH <span>V1.1.0 — CHARACTER-FIRST BUILD</span></footer>
-<div id="gate" class="gate"><div class="gate-card"><span class="eyebrow">HEXCORE PRIVATE STUDIO</span><h1>YUNA <i>POCKET</i></h1><div class="versionline">V1.1.0 · <span id="gateStep">ACCESS STAGE 01 / 02</span></div><form id="gateForm"><label for="gateInput">ACCESS PHRASE</label><input id="gateInput" type="password" required autocomplete="off" placeholder="ENTER PHRASE"><button type="submit">CONTINUE <span>→</span></button></form><p id="gateError" role="alert"></p><p class="fine">Visual access gate only — not server-side protection.</p></div></div>
-<script type="module" src="main.js"></script></body></html>
+<div class="stage-caption"><span class="state-led"></span> <span id="actionCaption">STANDBY / IDLE</span><span class="divider">/</span><span id="moodCaption">CALM</span></div><footer>POINTER DRAG · TAP REACTION · WEBGL SPRING MESH <span>V1.1.1 — CHARACTER-FIRST BUILD</span></footer>
+<div id="gate" class="gate"><div class="gate-card"><span class="eyebrow">HEXCORE PRIVATE STUDIO</span><h1>YUNA <i>POCKET</i></h1><div class="versionline">V1.1.1 · <span id="gateStep">ACCESS STAGE 01 / 02</span></div><form id="gateForm"><label for="gateInput">ACCESS PHRASE</label><input id="gateInput" type="password" required autocomplete="off" placeholder="ENTER PHRASE"><button type="submit">CONTINUE <span>→</span></button></form><p id="gateError" role="alert"></p><p class="fine">Visual access gate only — not server-side protection.</p></div></div>
+<script>
+// [010] ACCESS GATE — independent of PixiJS, module imports, and asset loading.
+// This display-only gate is not server-side authentication.
+(() => {
+  const form = document.getElementById('gateForm');
+  const input = document.getElementById('gateInput');
+  const error = document.getElementById('gateError');
+  const stage = document.getElementById('gateStep');
+  const gate = document.getElementById('gate');
+  const phrases = ['YUNA-MOUTH','LUNA-BUTT'];
+  let current = 0;
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const entered = input.value.trim();
+    if (entered !== phrases[current]) {
+      error.textContent = 'INCORRECT ACCESS PHRASE';
+      input.select();
+      return;
+    }
+    current++;
+    input.value = '';
+    error.textContent = '';
+    if (current === phrases.length) {
+      gate.classList.add('hidden');
+    } else {
+      stage.textContent = 'ACCESS STAGE 02 / 02';
+      input.focus();
+    }
+  });
+  input.focus();
+})();
+</script>
+<script type="module" src="main.js?v=1.1.1"></script></body></html>

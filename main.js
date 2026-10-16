@@ -6,9 +6,7 @@ import {CharacterRenderer} from './engine/render.js';
 import {bindInteractions} from './engine/interaction.js';
 import {loadSettings,saveSettings} from './engine/save.js';
 const $=id=>document.getElementById(id);
-// [010] Two-stage page-navigation gate (client-side convenience, not asset security).
-const phrases=['YUNA-MOUTH','LUNA-BUTT'];let passStage=0;
-$('gateForm').addEventListener('submit',e=>{e.preventDefault();const value=$('gateInput').value;if(value!==phrases[passStage]){$('gateError').textContent='INCORRECT ACCESS PHRASE';return}passStage++;$('gateInput').value='';$('gateError').textContent='';if(passStage===2){$('gate').classList.add('hidden')}else{$('gateStep').textContent='ACCESS STAGE 02 / 02';$('gateInput').focus()}});
+// [010] Access gate is initialized in index.html, independent of module load.
 const clock=new Clock();const anim=new AnimationDirector();const ai=new BehaviorDirector();const renderer=new CharacterRenderer($('viewport'));
 let now=0;let lastAction='idle';let settings={...{physics:100,speed:100,zoom:100},...loadSettings()};
 const status=t=>$('status').textContent=t;

@@ -1,4 +1,4 @@
-# Yuna Pocket V1.1.0 — modular character-engine foundation
+# Yuna Pocket V1.1.1 — modular character-engine foundation
 
 Open `index.html` through GitHub Pages or a local HTTP server; PixiJS v7 loads from a CDN. Opening from `file://` may block module/image loading. Front end only; no account, external AI, or secure authentication.
 
@@ -9,7 +9,7 @@ Open `index.html` through GitHub Pages or a local HTTP server; PixiJS v7 loads f
 - Fixed-step simulation scheduler, parameter animation blends, named actions.
 - Autonomous action scheduling and manual intervention.
 - Pointer/touch input, optional device orientation, and saved user preferences.
-- Two screen passphrase flow, neo-futuristic UI, V1.1.0 first screen.
+- Two screen passphrase flow, neo-futuristic UI, V1.1.1 first screen.
 
 ## Actual limitations
 - This is **not a Live2D Cubism export** or hand-authored professional deformer rig. It uses source 321x883 painted layers, so hands do not grip objects, mouth is not independently drawn, there are no expression textures, and articulation/occlusion is still limited.
@@ -22,3 +22,6 @@ Open `index.html` through GitHub Pages or a local HTTP server; PixiJS v7 loads f
 
 ### Next character-production requirement
 Create production anime artwork with separate face features, hair locks, ears/tail, hands, upper/lower limbs and hidden overlap painting; author deformation meshes and expressions in Live2D Cubism or equivalent compatible format; integrate the actual exported runtime. These steps cannot be supplied by creating primitive SVG figures.
+
+
+V1.1.1 LOGIN FIX: Login submission moved to inline script independent of external PixiJS CDN, module imports, and character assets. Correct phrases: YUNA-MOUTH then LUNA-BUTT.
